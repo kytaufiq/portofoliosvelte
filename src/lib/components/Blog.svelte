@@ -358,8 +358,103 @@
     }
 
     @media (max-width: 768px) {
+        section {
+            padding: 80px 0;
+        }
+
         .blog-grid {
             grid-template-columns: 1fr;
+        }
+
+        .blog-card {
+            border-radius: 20px;
+        }
+
+        .card-content {
+            padding: 22px;
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+        }
+
+        .card-excerpt {
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        section {
+            padding: 60px 0;
+        }
+
+        .container {
+            padding: 0 14px;
+        }
+
+        .section-header {
+            margin-bottom: 40px;
+        }
+
+        .blog-grid {
+            gap: 20px;
+            margin-bottom: 36px;
+        }
+
+        .blog-card {
+            border-radius: 18px;
+        }
+
+        .card-image {
+            height: 150px;
+            padding: 16px;
+        }
+
+        .card-category {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+        }
+
+        .card-content {
+            padding: 18px;
+        }
+
+        .card-meta {
+            font-size: 0.8rem;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .card-excerpt {
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+        }
+
+        .read-more {
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            padding: 14px 24px;
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 380px) {
+        .card-image {
+            height: 130px;
+        }
+
+        .card-content {
+            padding: 16px;
+        }
+
+        .card-title {
+            font-size: 1rem;
         }
     }
 </style>

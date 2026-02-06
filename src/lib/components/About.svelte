@@ -492,6 +492,10 @@
     }
 
     @media (max-width: 600px) {
+        section {
+            padding: 80px 0 50px;
+        }
+
         .services-grid {
             grid-template-columns: 1fr;
         }
@@ -505,6 +509,50 @@
             width: 100%;
             justify-content: center;
             max-width: 280px;
+        }
+
+        .about-title {
+            font-size: 1.8rem;
+        }
+
+        .about-tagline {
+            font-size: 1rem;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .container {
+            padding: 0 14px;
+        }
+
+        .image-container {
+            max-width: 220px;
+        }
+
+        .quick-info {
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .info-badge {
+            padding: 8px 14px;
+            font-size: 0.8rem;
+        }
+
+        .service-item {
+            padding: 12px 14px;
+        }
+
+        .service-icon {
+            font-size: 1.3rem;
+        }
+
+        .service-info h4 {
+            font-size: 0.85rem;
+        }
+
+        .about-description p {
+            font-size: 0.9rem;
         }
     }
 </style>

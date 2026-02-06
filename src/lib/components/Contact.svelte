@@ -539,11 +539,164 @@
             grid-template-columns: 1fr;
             gap: 48px;
         }
+
+        .info-title {
+            font-size: 1.5rem;
+        }
+    }
+
+    @media (max-width: 640px) {
+        section {
+            padding: 80px 0 0;
+        }
+
+        .contact-form-wrapper {
+            padding: 28px;
+        }
+
+        .contact-card {
+            padding: 16px;
+        }
+
+        .contact-icon {
+            font-size: 1.5rem;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+        }
+
+        .social-link {
+            width: 44px;
+            height: 44px;
+        }
+
+        .footer {
+            margin-top: 60px;
+        }
     }
 
     @media (max-width: 480px) {
+        section {
+            padding: 60px 0 0;
+        }
+
+        .container {
+            padding: 0 14px;
+        }
+
+        .section-header {
+            margin-bottom: 40px;
+        }
+
         .contact-form-wrapper {
-            padding: 24px;
+            padding: 20px;
+            border-radius: 20px;
+        }
+
+        .contact-form {
+            gap: 18px;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            padding: 14px 16px;
+            font-size: 0.95rem;
+            border-radius: 12px;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+        }
+
+        .btn {
+            padding: 16px 24px;
+            font-size: 0.95rem;
+        }
+
+        .contact-cards {
+            gap: 12px;
+        }
+
+        .contact-card {
+            padding: 14px;
+            gap: 12px;
+            border-radius: 14px;
+        }
+
+        .contact-icon {
+            font-size: 1.3rem;
+            width: 44px;
+            height: 44px;
+        }
+
+        .contact-label {
+            font-size: 0.8rem;
+        }
+
+        .contact-value {
+            font-size: 0.9rem;
+        }
+
+        .socials {
+            gap: 10px;
+        }
+
+        .social-link {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+        }
+
+        .social-link svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .info-title {
+            font-size: 1.4rem;
+        }
+
+        .info-text {
+            font-size: 0.9rem;
+        }
+
+        .footer {
+            margin-top: 50px;
+            padding: 24px 0;
+        }
+
+        .copyright {
+            font-size: 0.8rem;
+        }
+    }
+
+    @media (max-width: 380px) {
+        .contact-form-wrapper {
+            padding: 18px;
+        }
+
+        .contact-card {
+            padding: 12px;
+        }
+
+        .contact-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            padding: 12px 14px;
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
         }
     }
 </style>

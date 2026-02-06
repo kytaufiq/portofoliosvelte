@@ -323,7 +323,18 @@ h6 {
   opacity: 0.5;
 }
 
-/* Responsive */
+/* Responsive - Tablet */
+@media (max-width: 1024px) {
+  :root {
+    --section-padding: 100px 0;
+  }
+
+  .container {
+    padding: 0 20px;
+  }
+}
+
+/* Responsive - Mobile */
 @media (max-width: 768px) {
   :root {
     --section-padding: 80px 0;
@@ -331,5 +342,60 @@ h6 {
 
   .container {
     padding: 0 16px;
+  }
+
+  .section-title {
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+  }
+
+  .section-subtitle {
+    font-size: 1rem;
+  }
+
+  .btn {
+    padding: 12px 20px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Responsive - Small Mobile */
+@media (max-width: 480px) {
+  :root {
+    --section-padding: 60px 0;
+  }
+
+  .container {
+    padding: 0 14px;
+  }
+
+  .section-header {
+    margin-bottom: 40px;
+  }
+
+  .section-label {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+
+  .btn {
+    padding: 12px 18px;
+    font-size: 0.85rem;
+    gap: 6px;
+  }
+
+  .card {
+    padding: 20px;
+    border-radius: 16px;
+  }
+}
+
+/* Responsive - Extra Small Mobile */
+@media (max-width: 380px) {
+  .container {
+    padding: 0 12px;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
   }
 }

@@ -760,4 +760,73 @@
             gap: 16px;
         }
     }
+
+    @media (max-width: 400px) {
+        section {
+            padding: 60px 0;
+        }
+
+        .container {
+            padding: 0 14px;
+        }
+
+        .skills-grid {
+            padding: 0;
+        }
+
+        .card-content {
+            padding: 16px;
+        }
+
+        .card-header {
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .category-icon {
+            width: 36px;
+            height: 36px;
+            font-size: 1rem;
+            border-radius: 8px;
+        }
+
+        .category-name {
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+        }
+
+        .skill-name-wrapper {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .skill-name {
+            font-size: 0.82rem;
+            word-break: break-word;
+        }
+
+        .skill-icon {
+            width: 16px;
+            height: 16px;
+        }
+
+        .skill-level {
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            flex-shrink: 0;
+        }
+
+        .progress-bar {
+            height: 5px;
+        }
+
+        .section-label {
+            padding: 8px 16px;
+            font-size: 0.8rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+        }
+    }
 </style>

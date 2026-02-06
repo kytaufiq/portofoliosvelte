@@ -797,14 +797,49 @@
             padding: 80px 0 80px;
         }
 
+        .hero-container {
+            padding: 0 16px;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .hero-badge {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+        }
+
+        .hero-title {
+            font-size: clamp(1.6rem, 7vw, 2.5rem);
+        }
+
+        .hero-subtitle {
+            font-size: 0.9rem;
+        }
+
         .hero-buttons {
             flex-direction: column;
             align-items: center;
+            width: 100%;
+        }
+
+        .btn {
+            width: 100%;
+            max-width: 280px;
+            justify-content: center;
+            padding: 14px 20px;
         }
 
         .hero-stats {
             flex-direction: column;
             gap: 20px;
+        }
+
+        .stat-number {
+            font-size: 1.4rem;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
         }
 
         .stat-divider {
@@ -818,12 +853,148 @@
             );
         }
 
+        /* Show code editor as compact version on mobile */
         .hero-illustration {
-            display: none;
+            display: flex;
+            order: 2;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .illustration-container {
+            max-width: 100%;
+        }
+
+        .code-editor {
+            border-radius: 10px;
+        }
+
+        .editor-header {
+            padding: 10px 12px;
+            gap: 10px;
+        }
+
+        .window-controls {
+            gap: 6px;
+        }
+
+        .control {
+            width: 10px;
+            height: 10px;
+        }
+
+        .tab {
+            padding: 4px 10px;
+            font-size: 0.7rem;
+            gap: 4px;
+        }
+
+        .tab svg {
+            width: 10px;
+            height: 10px;
+        }
+
+        .editor-body {
+            min-height: 140px;
+            font-size: 0.7rem;
+            line-height: 1.5;
+        }
+
+        .line-numbers {
+            padding: 12px 8px;
+            min-width: 28px;
+            font-size: 0.65rem;
+        }
+
+        .code-content {
+            padding: 12px 10px;
+        }
+
+        .status-bar {
+            padding: 6px 10px;
+            font-size: 0.65rem;
+        }
+
+        .floating-icon {
+            width: 36px;
+            height: 36px;
+        }
+
+        .floating-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .floating-icon:nth-child(1) {
+            top: -15px;
+            right: -8px;
+        }
+
+        .floating-icon:nth-child(2) {
+            bottom: 30%;
+            right: -12px;
+        }
+
+        .floating-icon:nth-child(3) {
+            bottom: -10px;
+            left: -8px;
         }
 
         .scroll-indicator {
             bottom: 20px;
+        }
+
+        .scroll-text {
+            font-size: 0.8rem;
+        }
+    }
+
+    @media (max-width: 380px) {
+        .hero {
+            padding: 70px 0 60px;
+        }
+
+        .hero-container {
+            padding: 0 14px;
+            gap: 30px;
+        }
+
+        .hero-title {
+            font-size: 1.5rem;
+            margin-bottom: 14px;
+        }
+
+        .hero-subtitle {
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
+
+        .hero-buttons {
+            margin-bottom: 28px;
+        }
+
+        .btn {
+            padding: 12px 18px;
+            font-size: 0.85rem;
+        }
+
+        .stat-number {
+            font-size: 1.3rem;
+        }
+
+        .editor-body {
+            min-height: 120px;
+            font-size: 0.65rem;
+        }
+
+        .line-numbers {
+            font-size: 0.6rem;
+            min-width: 24px;
+            padding: 10px 6px;
+        }
+
+        .code-content {
+            padding: 10px 8px;
         }
     }
 </style>

@@ -696,8 +696,101 @@
             display: none;
         }
 
+        .logo-text {
+            font-size: 1.1rem;
+        }
+
         .lang-btn .btn-content {
             padding: 8px 10px;
+        }
+
+        .theme-toggle {
+            width: 38px;
+            height: 38px;
+        }
+
+        .hamburger {
+            width: 34px;
+            height: 34px;
+        }
+
+        .hamburger span {
+            width: 18px;
+        }
+
+        .nav-links-wrapper {
+            width: 260px;
+        }
+
+        .nav-links a {
+            font-size: 1rem;
+            padding: 14px 20px;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .nav-container {
+            padding: 0 14px;
+        }
+
+        .logo-text {
+            font-size: 1rem;
+        }
+
+        .logo-bracket {
+            font-size: 1rem;
+        }
+
+        .nav-controls {
+            gap: 6px;
+        }
+
+        .lang-btn .btn-content {
+            padding: 6px 8px;
+            font-size: 0.75rem;
+        }
+
+        .lang-btn .btn-content svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .theme-toggle {
+            width: 34px;
+            height: 34px;
+        }
+
+        .theme-toggle svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .hamburger {
+            width: 32px;
+            height: 32px;
+        }
+    }
+
+    @media (max-width: 360px) {
+        .nav-container {
+            padding: 0 12px;
+        }
+
+        .logo-text {
+            font-size: 0.95rem;
+        }
+
+        .lang-btn .btn-content {
+            padding: 5px 6px;
+        }
+
+        .lang-btn span:not(.btn-content):not(:last-child) {
+            display: none;
+        }
+
+        .theme-toggle {
+            width: 32px;
+            height: 32px;
         }
     }
 </style>

@@ -398,6 +398,14 @@
     }
 
     @media (max-width: 640px) {
+        section {
+            padding: 80px 0;
+        }
+
+        .container {
+            padding: 0 16px;
+        }
+
         .card-header {
             flex-direction: column;
         }
@@ -406,6 +414,115 @@
             align-items: flex-start;
             flex-direction: row;
             gap: 12px;
+        }
+
+        .timeline-item {
+            padding-left: 50px;
+        }
+
+        .timeline-card {
+            padding: 22px;
+        }
+
+        .role {
+            font-size: 1.15rem;
+        }
+
+        .description {
+            font-size: 0.9rem;
+        }
+
+        .highlights {
+            gap: 10px;
+        }
+
+        .highlight {
+            font-size: 0.8rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        section {
+            padding: 60px 0;
+        }
+
+        .container {
+            padding: 0 14px;
+        }
+
+        .section-header {
+            margin-bottom: 40px;
+        }
+
+        .timeline-line {
+            left: 14px;
+        }
+
+        .timeline-item {
+            padding-left: 40px;
+            margin-bottom: 28px;
+        }
+
+        .timeline-dot {
+            left: 4px;
+            width: 20px;
+            height: 20px;
+        }
+
+        .dot-inner {
+            width: 6px;
+            height: 6px;
+        }
+
+        .timeline-card {
+            padding: 18px;
+            border-radius: 16px;
+        }
+
+        .role {
+            font-size: 1.05rem;
+        }
+
+        .company {
+            font-size: 0.9rem;
+        }
+
+        .period {
+            font-size: 0.8rem;
+        }
+
+        .type {
+            padding: 3px 10px;
+            font-size: 0.7rem;
+        }
+
+        .description {
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+        }
+
+        .tech-tag {
+            padding: 5px 10px;
+            font-size: 0.75rem;
+        }
+    }
+
+    @media (max-width: 380px) {
+        .timeline-item {
+            padding-left: 36px;
+        }
+
+        .timeline-card {
+            padding: 16px;
+        }
+
+        .role {
+            font-size: 1rem;
+        }
+
+        .highlights {
+            flex-direction: column;
+            gap: 8px;
         }
     }
 </style>
