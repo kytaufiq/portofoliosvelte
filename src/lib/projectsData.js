@@ -5,77 +5,71 @@ export const projects = [
     {
         id: 1,
         slug: 'dafdev-portfolio',
-        title: 'DafDev Portfolio',
-        shortDescription: 'Modern portfolio website with stunning animations and interactive 3D elements.',
+        title: 'DILTIFY Music Player',
         description: [
-            'DafDev is my personal portfolio website built using Next.js and modern web technologies.',
-            'It showcases my projects and experiences through an interactive design, enhanced with animations and a modern, user-friendly UI/UX.',
-            'The website is designed to create an engaging user experience while clearly presenting my skills, work, and professional journey.'
+            'DILTIFY Music Player is a web-based music player built using Next.js and modern web technologies.',
+            'It provides a user-friendly interface for users to listen to music and manage their playlists.',
+            'additional features include a search bar, a library of popular songs, and the ability to create and manage playlists.',
         ],
-        tags: ['Next.js', 'Three.js', 'Tailwind', 'PostgreSQL', 'Prisma', 'React', 'TypeScript'],
+        tags: ['Next.js', 'Tailwind', 'PostgreSQL', 'Prisma', 'React', 'TypeScript'],
         // Replace with actual video path when available: '/videos/dafdev-demo.mp4'
-        mediaUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80',
-        mediaType: 'image', // Change to 'video' when video is available
-        websiteUrl: 'https://example.com',
-        githubUrl: 'https://github.com/username/dafdev',
-        publishedDate: 'January 31, 2026',
+        mediaUrl: '/videos/diltify.mp4',
+        mediaType: 'video', // Change to 'video' when video is available
+        githubUrl: 'https://github.com/anndaanhr/Diltify',
+        publishedDate: 'Nov 14, 2025',
         featured: true,
         gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
     },
     {
         id: 2,
-        slug: 'chess-game',
-        title: 'My Chess',
-        shortDescription: 'Interactive chess game with custom piece logic and beautiful UI design.',
+        slug: 'sisirptpn',
+        title: 'SISIR (Sales and Inventories Statistic of Rubber)',
         description: [
-            'This website is a chess game built with manually implemented piece logic to handle all chess rules and movements.',
-            'Each chess piece is programmed individually, requiring complex logical reasoning to ensure accurate gameplay.',
-            'The project is designed to train and improve logical thinking, problem-solving skills, and understanding of game mechanics through hands-on logic implementation.'
+            'This web-based system is designed to monitor rubber sales data at PT. Perkebunan Nusantara I Regional 7.',
+            'Users can easily track and analyze rubber sales through clear and easy-to-understand graphical dashboards.',
+            'The system provides structured data management features, allowing users to manage, update, and organize sales data efficiently.',
+            'With visual reports and a user-friendly interface, the system helps improve accuracy, transparency, and decision-making in rubber sales monitoring.'
         ],
-        tags: ['HTML', 'CSS', 'JavaScript', 'Canvas'],
-        mediaUrl: 'https://images.unsplash.com/photo-1529699211952-734e80c4d42b?w=800&q=80',
-        mediaType: 'image',
-        websiteUrl: 'https://example.com/chess',
-        githubUrl: 'https://github.com/username/chess',
-        publishedDate: 'December 15, 2025',
+        tags: ['Laravel', 'PostgreSQL', 'Tailwind', 'PHP', 'CSS', 'JavaScript'],
+        mediaUrl: '/videos/sisirptpn.mp4',
+        mediaType: 'video',
+        mediaStartTime: 5, // Format: angka detik (5) atau string menit:detik ("1:30" = menit 1 detik 30)
+        githubUrl: 'https://github.com/dafffatih/SISIR_PTPN_7',
+        publishedDate: 'Jan 17, 2026',
         featured: true,
         gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
     },
     {
         id: 3,
-        slug: 'ecommerce-platform',
-        title: 'ShopVerse',
-        shortDescription: 'Full-featured e-commerce platform with payment integration and admin dashboard.',
+        slug: 'doittogether',
+        title: 'DoItTogether',
         description: [
-            'ShopVerse is a comprehensive e-commerce solution built with modern technologies to provide seamless shopping experience.',
-            'Features include user authentication, product catalog, shopping cart, payment processing with Stripe, and a complete admin dashboard.',
-            'The platform is optimized for performance and scalability, handling thousands of products and concurrent users efficiently.'
+            'DoItTogether is a web-based task management and team collaboration platform that helps you organize work with friends or teammates in one place.',
+            'Users can create, assign, and track tasks in real time, monitor progress at a glance, and collaborate efficiently without switching between multiple tools.',
+            'With a clean and intuitive dark-themed interface, DoItTogether makes teamwork simpler, more transparent, and easier to manage from start to finish.'
         ],
-        tags: ['React', 'Node.js', 'MongoDB', 'Stripe', 'Redux', 'Express'],
-        mediaUrl: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80',
-        mediaType: 'image',
-        websiteUrl: 'https://example.com/shopverse',
-        githubUrl: 'https://github.com/username/shopverse',
-        publishedDate: 'November 20, 2025',
+        tags: ['Laravel', 'PostgreSQL', 'Tailwind', 'PHP', 'CSS', 'JavaScript'],
+        mediaUrl: '/videos/doittogther.mp4',
+        mediaType: 'video',
+        githubUrl: 'https://github.com/Tesyaf/doittogether',
+        publishedDate: 'Dec 9, 2025',
         featured: false,
         gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
     },
     {
         id: 4,
-        slug: 'task-manager',
-        title: 'TaskFlow',
-        shortDescription: 'Collaborative task management app with real-time updates and team features.',
+        slug: 'sleep-disorder-expert-system',
+        title: 'Sleep Disorder Expert System',
         description: [
-            'TaskFlow is a modern task management application designed for teams and individuals to organize their work efficiently.',
-            'Real-time collaboration features allow multiple team members to update tasks simultaneously with instant synchronization.',
-            'Built with productivity in mind, featuring drag-and-drop kanban boards, deadline reminders, and detailed analytics.'
+            'Sleep Disorder Expert System is a web-based application designed to analyze users\' sleep patterns and overall health conditions.',
+            'Users can input personal information, sleep habits, lifestyle data, and health indicators such as sleep duration, stress level, BMI category, heart rate, blood pressure, and daily steps.',
+            'The system processes the data using a Random Forest machine learning model to predict potential sleep disorders such as Insomnia, Sleep Apnea, and Narcolepsy, while providing informative insights in a clean and user-friendly interface.'
         ],
-        tags: ['SvelteKit', 'Firebase', 'Tailwind', 'WebSocket'],
-        mediaUrl: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800&q=80',
-        mediaType: 'image',
-        websiteUrl: 'https://example.com/taskflow',
-        githubUrl: 'https://github.com/username/taskflow',
-        publishedDate: 'October 5, 2025',
+tags: ['Laravel', 'PHP', 'Bootstrap 5', 'Python', 'Flask API', 'Random Forest', 'Machine Learning'],
+        mediaUrl: '/videos/sleepdisorder.mp4',
+        mediaType: 'video',
+        githubUrl: 'https://github.com/kemasmalfath/Pakar_tidur',
+        publishedDate: 'Dec 7, 2025',
         featured: false,
         gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)'
     }

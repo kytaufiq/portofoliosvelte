@@ -4,6 +4,40 @@
     import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
     import { projects } from "$lib/projectsData.js";
 
+    // Parse startTime: angka detik (90) atau string "menit:detik" ("1:30")
+    function parseStartTime(startTime) {
+        if (typeof startTime === "string" && startTime.includes(":")) {
+            const [min, sec] = startTime.split(":").map(Number);
+            return min * 60 + sec;
+        }
+        return Number(startTime) || 0;
+    }
+
+    // Array referensi elemen <video> per index
+    let videoEls = [];
+
+    function onCardEnter(videoEl, startTime) {
+        if (!videoEl) return;
+        const seconds = parseStartTime(startTime);
+        if (videoEl.readyState >= 1) {
+            videoEl.currentTime = seconds;
+        } else {
+            videoEl.addEventListener(
+                "loadedmetadata",
+                () => {
+                    videoEl.currentTime = seconds;
+                },
+                { once: true },
+            );
+        }
+        videoEl.play();
+    }
+
+    function onCardLeave(videoEl) {
+        if (!videoEl) return;
+        videoEl.pause();
+    }
+
     let section;
     let header;
     let projectCards = [];
@@ -94,18 +128,22 @@
                     href="/projects/{project.slug}"
                     bind:this={projectCards[i]}
                     class="project-card"
+                    on:mouseenter={() =>
+                        onCardEnter(videoEls[i], project.mediaStartTime ?? 0)}
+                    on:mouseleave={() => onCardLeave(videoEls[i])}
                 >
                     <!-- Media Preview -->
                     <div class="project-media">
                         <div class="media-wrapper">
                             {#if project.mediaType === "video"}
                                 <video
-                                    autoplay
                                     muted
                                     loop
                                     playsinline
+                                    preload="metadata"
                                     src={project.mediaUrl}
                                     class="project-video"
+                                    bind:this={videoEls[i]}
                                 >
                                     <track kind="captions" />
                                 </video>

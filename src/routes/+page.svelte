@@ -6,7 +6,6 @@
   import Skills from "$lib/components/Skills.svelte";
   import Projects from "$lib/components/Projects.svelte";
   import Experience from "$lib/components/Experience.svelte";
-  import Blog from "$lib/components/Blog.svelte";
   import Contact from "$lib/components/Contact.svelte";
 
   let starsCanvas;
@@ -16,75 +15,225 @@
   let animationId;
   let cursorAnimationId;
 
-  // Star particles
+  // ── Stars ────────────────────────────────────────────────────────
   const stars = [];
-  const numStars = 150;
+  const NUM_STARS = 350;
 
-  // Snake cursor trail
+  // ── Meteor ───────────────────────────────────────────────────────
+  let meteor = null; // one meteor at a time
+  let meteorTimer = null;
+
+  // ── Cursor trail ─────────────────────────────────────────────────
   const trail = [];
   const trailLength = 20;
   let mouseX = 0;
   let mouseY = 0;
 
+  // Star color palette
+  const STAR_COLORS = [
+    [255, 255, 255], // pure white
+    [200, 210, 255], // cool blue-white
+    [255, 240, 200], // warm yellow-white
+    [210, 180, 255], // soft purple
+    [180, 220, 255], // sky blue
+  ];
+
+  function randomStarColor() {
+    return STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)];
+  }
+
+  function createStar(randomPos = true) {
+    const angle = Math.random() * Math.PI * 2; // full 360° direction
+    const speed = Math.random() * 0.25 + 0.05; // slow drift
+    return {
+      x: randomPos
+        ? Math.random() * (starsCanvas?.width || window.innerWidth)
+        : Math.random() * window.innerWidth,
+      y: randomPos
+        ? Math.random() * (starsCanvas?.height || window.innerHeight)
+        : Math.random() * window.innerHeight,
+      size: Math.random() * 1.8 + 0.3,
+      speedX: Math.cos(angle) * speed,
+      speedY: Math.sin(angle) * speed,
+      baseOpacity: Math.random() * 0.5 + 0.3,
+      // multi‑layer twinkle for realism
+      twinkleA: {
+        speed: Math.random() * 0.03 + 0.01,
+        phase: Math.random() * Math.PI * 2,
+      },
+      twinkleB: {
+        speed: Math.random() * 0.007 + 0.003,
+        phase: Math.random() * Math.PI * 2,
+      },
+      color: randomStarColor(),
+      isBright: Math.random() < 0.12, // 12% chance of sparkle cross
+    };
+  }
+
   function initStars() {
-    for (let i = 0; i < numStars; i++) {
-      stars.push({
-        x: Math.random() * window.innerWidth,
-        y: Math.random() * window.innerHeight,
-        size: Math.random() * 2 + 0.5,
-        speedX: (Math.random() - 0.5) * 0.5,
-        speedY: Math.random() * 0.3 + 0.1,
-        opacity: Math.random() * 0.8 + 0.2,
-        twinkleSpeed: Math.random() * 0.02 + 0.01,
-        twinklePhase: Math.random() * Math.PI * 2,
-      });
-    }
+    for (let i = 0; i < NUM_STARS; i++) stars.push(createStar(true));
+  }
+
+  function drawSparkle(ctx, x, y, size, opacity) {
+    // 4-point star cross
+    const arms = size * 4;
+    ctx.save();
+    ctx.globalAlpha = opacity * 0.6;
+    ctx.strokeStyle = `rgba(255,255,255,${opacity})`;
+    ctx.lineWidth = size * 0.4;
+    ctx.beginPath();
+    ctx.moveTo(x - arms, y);
+    ctx.lineTo(x + arms, y);
+    ctx.moveTo(x, y - arms);
+    ctx.lineTo(x, y + arms);
+    // diagonal arms (shorter)
+    const d = arms * 0.55;
+    ctx.moveTo(x - d, y - d);
+    ctx.lineTo(x + d, y + d);
+    ctx.moveTo(x + d, y - d);
+    ctx.lineTo(x - d, y + d);
+    ctx.stroke();
+    ctx.restore();
   }
 
   function animateStars() {
     if (!starsCtx) return;
 
-    starsCtx.clearRect(0, 0, starsCanvas.width, starsCanvas.height);
+    const W = starsCanvas.width;
+    const H = starsCanvas.height;
+    starsCtx.clearRect(0, 0, W, H);
+
+    const now = performance.now() * 0.001;
 
     stars.forEach((star) => {
       // Update position
       star.x += star.speedX;
       star.y += star.speedY;
 
-      // Twinkle effect
-      star.twinklePhase += star.twinkleSpeed;
-      const twinkle = Math.sin(star.twinklePhase) * 0.3 + 0.7;
+      // Wrap around all 4 edges
+      if (star.x < -2) star.x = W + 2;
+      if (star.x > W + 2) star.x = -2;
+      if (star.y < -2) star.y = H + 2;
+      if (star.y > H + 2) star.y = -2;
 
-      // Loop stars
-      if (star.y > starsCanvas.height) {
-        star.y = 0;
-        star.x = Math.random() * starsCanvas.width;
-      }
-      if (star.x < 0) star.x = starsCanvas.width;
-      if (star.x > starsCanvas.width) star.x = 0;
+      // Multi-layer twinkle (realistic)
+      star.twinkleA.phase += star.twinkleA.speed;
+      star.twinkleB.phase += star.twinkleB.speed;
+      const twinkle =
+        Math.sin(star.twinkleA.phase) * 0.35 +
+        Math.sin(star.twinkleB.phase) * 0.15 +
+        0.5;
+      const opacity = Math.max(0, Math.min(1, star.baseOpacity * twinkle));
+      const [r, g, b] = star.color;
 
-      // Draw star
-      starsCtx.beginPath();
-      starsCtx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-      starsCtx.fillStyle = `rgba(255, 255, 255, ${star.opacity * twinkle})`;
-      starsCtx.fill();
-
-      // Add glow effect for larger stars
-      if (star.size > 1.5) {
+      // Outer glow for bright stars
+      if (star.size > 1.2) {
+        const grad = starsCtx.createRadialGradient(
+          star.x,
+          star.y,
+          0,
+          star.x,
+          star.y,
+          star.size * 3.5,
+        );
+        grad.addColorStop(0, `rgba(${r},${g},${b},${opacity * 0.4})`);
+        grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
         starsCtx.beginPath();
-        starsCtx.arc(star.x, star.y, star.size * 2, 0, Math.PI * 2);
-        starsCtx.fillStyle = `rgba(99, 102, 241, ${star.opacity * twinkle * 0.3})`;
+        starsCtx.arc(star.x, star.y, star.size * 3.5, 0, Math.PI * 2);
+        starsCtx.fillStyle = grad;
         starsCtx.fill();
       }
+
+      // Core dot
+      starsCtx.beginPath();
+      starsCtx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+      starsCtx.fillStyle = `rgba(${r},${g},${b},${opacity})`;
+      starsCtx.fill();
+
+      // Sparkle cross for bright stars
+      if (star.isBright && opacity > 0.45) {
+        drawSparkle(starsCtx, star.x, star.y, star.size, opacity);
+      }
     });
+
+    // Draw meteor if active
+    if (meteor) drawMeteor();
 
     animationId = requestAnimationFrame(animateStars);
   }
 
-  function initTrail() {
-    for (let i = 0; i < trailLength; i++) {
-      trail.push({ x: 0, y: 0 });
+  // ── Meteor ───────────────────────────────────────────────────────
+  function spawnMeteor() {
+    const W = starsCanvas?.width || window.innerWidth;
+    const H = starsCanvas?.height || window.innerHeight;
+    // Start from top edge (random X), angle slightly downward
+    const angle = (Math.random() * 30 + 20) * (Math.PI / 180); // 20-50 degrees
+    meteor = {
+      x: Math.random() * W,
+      y: 0,
+      vx: Math.cos(angle) * 18,
+      vy: Math.sin(angle) * 18,
+      len: Math.random() * 120 + 80, // trail length
+      life: 1.0, // fades out
+      decay: 0.016,
+    };
+  }
+
+  function drawMeteor() {
+    if (!meteor) return;
+    meteor.x += meteor.vx;
+    meteor.y += meteor.vy;
+    meteor.life -= meteor.decay;
+
+    if (
+      meteor.life <= 0 ||
+      meteor.x > starsCanvas.width + 200 ||
+      meteor.y > starsCanvas.height + 200
+    ) {
+      meteor = null;
+      scheduleMeteor();
+      return;
     }
+
+    const tailX = meteor.x - meteor.vx * (meteor.len / 18);
+    const tailY = meteor.y - meteor.vy * (meteor.len / 18);
+
+    const grad = starsCtx.createLinearGradient(
+      meteor.x,
+      meteor.y,
+      tailX,
+      tailY,
+    );
+    grad.addColorStop(0, `rgba(255,255,255,${meteor.life})`);
+    grad.addColorStop(0.3, `rgba(180,180,255,${meteor.life * 0.6})`);
+    grad.addColorStop(1, `rgba(120,100,255,0)`);
+
+    starsCtx.save();
+    starsCtx.beginPath();
+    starsCtx.moveTo(meteor.x, meteor.y);
+    starsCtx.lineTo(tailX, tailY);
+    starsCtx.strokeStyle = grad;
+    starsCtx.lineWidth = 2;
+    starsCtx.lineCap = "round";
+    starsCtx.stroke();
+
+    // Bright head
+    starsCtx.beginPath();
+    starsCtx.arc(meteor.x, meteor.y, 2.5, 0, Math.PI * 2);
+    starsCtx.fillStyle = `rgba(255,255,255,${meteor.life})`;
+    starsCtx.fill();
+
+    starsCtx.restore();
+  }
+
+  function scheduleMeteor() {
+    const delay = (Math.random() * 6 + 5) * 1000; // 5-11 detik
+    meteorTimer = setTimeout(spawnMeteor, delay);
+  }
+
+  // ── Cursor trail ─────────────────────────────────────────────────
+  function initTrail() {
+    for (let i = 0; i < trailLength; i++) trail.push({ x: 0, y: 0 });
   }
 
   function handleMouseMove(e) {
@@ -94,27 +243,19 @@
 
   function animateCursor() {
     if (!cursorCtx) return;
-
     cursorCtx.clearRect(0, 0, cursorCanvas.width, cursorCanvas.height);
 
-    // Update trail positions with smooth following (snake effect)
     let prevX = mouseX;
     let prevY = mouseY;
-
     trail.forEach((point, index) => {
-      // Smooth interpolation for snake-like movement
       const ease = 0.35 - index * 0.01;
       point.x += (prevX - point.x) * ease;
       point.y += (prevY - point.y) * ease;
-
       prevX = point.x;
       prevY = point.y;
 
-      // Draw circle with gradient based on position in trail
       const size = ((trailLength - index) / trailLength) * 10 + 2;
       const opacity = ((trailLength - index) / trailLength) * 0.8;
-
-      // Gradient color from purple to indigo
       const hue = 250 + index * 2;
 
       cursorCtx.beginPath();
@@ -122,7 +263,6 @@
       cursorCtx.fillStyle = `hsla(${hue}, 70%, 60%, ${opacity})`;
       cursorCtx.fill();
 
-      // Add inner glow
       if (index < 5) {
         cursorCtx.beginPath();
         cursorCtx.arc(point.x, point.y, size * 0.5, 0, Math.PI * 2);
@@ -130,7 +270,6 @@
         cursorCtx.fill();
       }
     });
-
     cursorAnimationId = requestAnimationFrame(animateCursor);
   }
 
@@ -146,7 +285,6 @@
   }
 
   onMount(() => {
-    // Initialize stars canvas
     starsCtx = starsCanvas.getContext("2d");
     cursorCtx = cursorCanvas.getContext("2d");
 
@@ -155,6 +293,7 @@
     initTrail();
     animateStars();
     animateCursor();
+    scheduleMeteor();
 
     window.addEventListener("resize", resizeCanvas);
     window.addEventListener("mousemove", handleMouseMove);
@@ -163,6 +302,7 @@
   onDestroy(() => {
     if (animationId) cancelAnimationFrame(animationId);
     if (cursorAnimationId) cancelAnimationFrame(cursorAnimationId);
+    if (meteorTimer) clearTimeout(meteorTimer);
     if (typeof window !== "undefined") {
       window.removeEventListener("resize", resizeCanvas);
       window.removeEventListener("mousemove", handleMouseMove);
@@ -183,7 +323,6 @@
     <div class="gradient-orb orb-2"></div>
     <div class="gradient-orb orb-3"></div>
     <div class="gradient-orb orb-4"></div>
-    <div class="grid-pattern"></div>
   </div>
 
   <Navbar />
@@ -194,7 +333,6 @@
     <Skills />
     <Projects />
     <Experience />
-    <Blog />
     <Contact />
   </main>
 </div>
@@ -347,17 +485,6 @@
     75% {
       transform: translate(-30px, -20px) scale(1.02);
     }
-  }
-
-  .grid-pattern {
-    position: absolute;
-    inset: 0;
-    background-image: linear-gradient(
-        rgba(99, 102, 241, 0.03) 1px,
-        transparent 1px
-      ),
-      linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
-    background-size: 50px 50px;
   }
 
   main {

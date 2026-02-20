@@ -1,5 +1,5 @@
 <script>
-    import { onMount } from "svelte";
+    import { onMount, onDestroy } from "svelte";
     import gsap from "gsap";
 
     export let data;
@@ -10,50 +10,236 @@
     let infoSection;
     let detailsPanel;
 
+    // ── Video Player State ──────────────────────────────────────────
+    let videoEl;
+    let playerWrapper;
+    let progressBar;
+
+    let isPlaying = false;
+    let isMuted = false;
+    let isFullscreen = false;
+    let volume = 1;
+    let currentTime = 0;
+    let duration = 0;
+    let buffered = 0;
+    let showControls = true;
+    let controlsTimer;
+    let isDragging = false;
+
+    // Format seconds → "m:ss"
+    function formatTime(sec) {
+        if (!sec || isNaN(sec)) return "0:00";
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60)
+            .toString()
+            .padStart(2, "0");
+        return `${m}:${s}`;
+    }
+
+    function togglePlay() {
+        if (!videoEl) return;
+        if (videoEl.paused) {
+            videoEl.play();
+        } else {
+            videoEl.pause();
+        }
+    }
+
+    function toggleMute() {
+        if (!videoEl) return;
+        videoEl.muted = !videoEl.muted;
+        isMuted = videoEl.muted;
+    }
+
+    function onVolumeChange() {
+        if (!videoEl) return;
+        videoEl.volume = volume;
+        isMuted = volume === 0;
+        videoEl.muted = isMuted;
+    }
+
+    function onTimeUpdate() {
+        if (!videoEl || isDragging) return;
+        currentTime = videoEl.currentTime;
+        // Update buffered
+        if (videoEl.buffered.length > 0) {
+            buffered = videoEl.buffered.end(videoEl.buffered.length - 1);
+        }
+    }
+
+    function onLoadedMetadata() {
+        if (!videoEl) return;
+        duration = videoEl.duration;
+    }
+
+    function onPlay() {
+        isPlaying = true;
+    }
+    function onPause() {
+        isPlaying = false;
+    }
+
+    // Progress bar seeking
+    function seek(e) {
+        if (!progressBar || !videoEl) return;
+        const rect = progressBar.getBoundingClientRect();
+        const ratio = Math.min(
+            Math.max((e.clientX - rect.left) / rect.width, 0),
+            1,
+        );
+        videoEl.currentTime = ratio * duration;
+        currentTime = videoEl.currentTime;
+    }
+
+    function onProgressMouseDown(e) {
+        isDragging = true;
+        seek(e);
+        window.addEventListener("mousemove", onProgressMouseMove);
+        window.addEventListener("mouseup", onProgressMouseUp);
+    }
+    function onProgressMouseMove(e) {
+        if (isDragging) seek(e);
+    }
+    function onProgressMouseUp(e) {
+        isDragging = false;
+        window.removeEventListener("mousemove", onProgressMouseMove);
+        window.removeEventListener("mouseup", onProgressMouseUp);
+    }
+
+    // Touch support for progress bar
+    function onProgressTouchStart(e) {
+        isDragging = true;
+        seekTouch(e);
+    }
+    function onProgressTouchMove(e) {
+        if (isDragging) seekTouch(e);
+    }
+    function onProgressTouchEnd() {
+        isDragging = false;
+    }
+    function seekTouch(e) {
+        if (!progressBar || !videoEl) return;
+        const touch = e.touches[0];
+        const rect = progressBar.getBoundingClientRect();
+        const ratio = Math.min(
+            Math.max((touch.clientX - rect.left) / rect.width, 0),
+            1,
+        );
+        videoEl.currentTime = ratio * duration;
+        currentTime = videoEl.currentTime;
+    }
+
+    // Skip ±10 seconds
+    function skip(sec) {
+        if (!videoEl) return;
+        videoEl.currentTime = Math.min(
+            Math.max(videoEl.currentTime + sec, 0),
+            duration,
+        );
+    }
+
+    // Fullscreen
+    function toggleFullscreen() {
+        if (!playerWrapper) return;
+        if (!document.fullscreenElement) {
+            playerWrapper.requestFullscreen?.();
+        } else {
+            document.exitFullscreen?.();
+        }
+    }
+
+    function onFullscreenChange() {
+        isFullscreen = !!document.fullscreenElement;
+    }
+
+    // Auto-hide controls
+    function scheduleHideControls() {
+        clearTimeout(controlsTimer);
+        showControls = true;
+        controlsTimer = setTimeout(() => {
+            if (isPlaying) showControls = false;
+        }, 3000);
+    }
+
+    function onPlayerMouseMove() {
+        scheduleHideControls();
+    }
+    function onPlayerMouseLeave() {
+        if (isPlaying) {
+            controlsTimer = setTimeout(() => {
+                showControls = false;
+            }, 800);
+        }
+    }
+
+    // Keyboard shortcuts
+    function onKeydown(e) {
+        if (!videoEl) return;
+        switch (e.key) {
+            case " ":
+            case "k":
+                e.preventDefault();
+                togglePlay();
+                break;
+            case "ArrowRight":
+                e.preventDefault();
+                skip(10);
+                break;
+            case "ArrowLeft":
+                e.preventDefault();
+                skip(-10);
+                break;
+            case "m":
+                toggleMute();
+                break;
+            case "f":
+                toggleFullscreen();
+                break;
+        }
+    }
+
+    // Progress percentages
+    $: progressPercent = duration ? (currentTime / duration) * 100 : 0;
+    $: bufferedPercent = duration ? (buffered / duration) * 100 : 0;
+
+    // ── Page Animations ─────────────────────────────────────────────
     onMount(() => {
-        // Page entrance animations
         gsap.set(pageContainer, { opacity: 0 });
         gsap.set(mediaSection, { y: 40, opacity: 0 });
         gsap.set(infoSection, { y: 60, opacity: 0 });
         gsap.set(detailsPanel, { x: 40, opacity: 0 });
 
         const tl = gsap.timeline();
-
-        tl.to(pageContainer, {
-            opacity: 1,
-            duration: 0.3,
-            ease: "power2.out",
-        })
+        tl.to(pageContainer, { opacity: 1, duration: 0.3, ease: "power2.out" })
             .to(
                 mediaSection,
-                {
-                    y: 0,
-                    opacity: 1,
-                    duration: 0.6,
-                    ease: "power3.out",
-                },
+                { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" },
                 "-=0.1",
             )
             .to(
                 infoSection,
-                {
-                    y: 0,
-                    opacity: 1,
-                    duration: 0.6,
-                    ease: "power3.out",
-                },
+                { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" },
                 "-=0.4",
             )
             .to(
                 detailsPanel,
-                {
-                    x: 0,
-                    opacity: 1,
-                    duration: 0.5,
-                    ease: "power3.out",
-                },
+                { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" },
                 "-=0.3",
             );
+
+        document.addEventListener("fullscreenchange", onFullscreenChange);
+        document.addEventListener("keydown", onKeydown);
+
+        return () => {
+            document.removeEventListener(
+                "fullscreenchange",
+                onFullscreenChange,
+            );
+            document.removeEventListener("keydown", onKeydown);
+            window.removeEventListener("mousemove", onProgressMouseMove);
+            window.removeEventListener("mouseup", onProgressMouseUp);
+            clearTimeout(controlsTimer);
+        };
     });
 </script>
 
@@ -114,18 +300,274 @@
                         <span>{project.websiteUrl}</span>
                     </div>
                 </div>
+
                 <div class="frame-content">
                     {#if project.mediaType === "video"}
-                        <video
-                            autoplay
-                            muted
-                            loop
-                            playsinline
-                            src={project.mediaUrl}
-                            class="hero-media"
+                        <!-- ── Custom Video Player ── -->
+                        <div
+                            class="video-player"
+                            class:hide-cursor={!showControls}
+                            bind:this={playerWrapper}
+                            on:mousemove={onPlayerMouseMove}
+                            on:mouseleave={onPlayerMouseLeave}
                         >
-                            <track kind="captions" />
-                        </video>
+                            <!-- Video Element -->
+                            <video
+                                bind:this={videoEl}
+                                src={project.mediaUrl}
+                                class="hero-media"
+                                muted={isMuted}
+                                loop
+                                playsinline
+                                preload="metadata"
+                                on:timeupdate={onTimeUpdate}
+                                on:loadedmetadata={onLoadedMetadata}
+                                on:play={onPlay}
+                                on:pause={onPause}
+                                on:click={togglePlay}
+                            >
+                                <track kind="captions" />
+                            </video>
+
+                            <!-- Center Play Button (big overlay when paused) -->
+                            {#if !isPlaying}
+                                <button
+                                    class="center-play"
+                                    on:click={togglePlay}
+                                    aria-label="Play"
+                                >
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="currentColor"
+                                    >
+                                        <polygon points="5,3 19,12 5,21" />
+                                    </svg>
+                                </button>
+                            {/if}
+
+                            <!-- Controls Bar -->
+                            <div
+                                class="controls"
+                                class:visible={showControls || !isPlaying}
+                            >
+                                <!-- Progress Bar -->
+                                <div
+                                    class="progress-area"
+                                    bind:this={progressBar}
+                                    on:mousedown={onProgressMouseDown}
+                                    on:touchstart|preventDefault={onProgressTouchStart}
+                                    on:touchmove|preventDefault={onProgressTouchMove}
+                                    on:touchend={onProgressTouchEnd}
+                                    role="slider"
+                                    aria-label="Video progress"
+                                    aria-valuemin="0"
+                                    aria-valuemax={duration}
+                                    aria-valuenow={currentTime}
+                                    tabindex="0"
+                                >
+                                    <div class="progress-track">
+                                        <!-- Buffered -->
+                                        <div
+                                            class="progress-buffered"
+                                            style="width: {bufferedPercent}%"
+                                        ></div>
+                                        <!-- Played -->
+                                        <div
+                                            class="progress-played"
+                                            style="width: {progressPercent}%"
+                                        >
+                                            <div class="progress-thumb"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Bottom Controls Row -->
+                                <div class="controls-row">
+                                    <!-- Left side -->
+                                    <div class="controls-left">
+                                        <!-- Play/Pause -->
+                                        <button
+                                            class="ctrl-btn"
+                                            on:click={togglePlay}
+                                            aria-label={isPlaying
+                                                ? "Pause"
+                                                : "Play"}
+                                        >
+                                            {#if isPlaying}
+                                                <!-- Pause icon -->
+                                                <svg
+                                                    viewBox="0 0 24 24"
+                                                    fill="currentColor"
+                                                >
+                                                    <rect
+                                                        x="6"
+                                                        y="4"
+                                                        width="4"
+                                                        height="16"
+                                                        rx="1"
+                                                    />
+                                                    <rect
+                                                        x="14"
+                                                        y="4"
+                                                        width="4"
+                                                        height="16"
+                                                        rx="1"
+                                                    />
+                                                </svg>
+                                            {:else}
+                                                <!-- Play icon -->
+                                                <svg
+                                                    viewBox="0 0 24 24"
+                                                    fill="currentColor"
+                                                >
+                                                    <polygon
+                                                        points="5,3 19,12 5,21"
+                                                    />
+                                                </svg>
+                                            {/if}
+                                        </button>
+
+                                        <!-- Skip back 10s -->
+                                        <button
+                                            class="ctrl-btn"
+                                            on:click={() => skip(-10)}
+                                            aria-label="Back 10 seconds"
+                                        >
+                                            <svg
+                                                viewBox="0 0 24 24"
+                                                fill="currentColor"
+                                            >
+                                                <path
+                                                    d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"
+                                                />
+                                                <text
+                                                    x="8.5"
+                                                    y="15.5"
+                                                    font-size="5"
+                                                    font-weight="bold"
+                                                    fill="currentColor"
+                                                    text-anchor="middle"
+                                                    >10</text
+                                                >
+                                            </svg>
+                                        </button>
+
+                                        <!-- Skip forward 10s -->
+                                        <button
+                                            class="ctrl-btn"
+                                            on:click={() => skip(10)}
+                                            aria-label="Forward 10 seconds"
+                                        >
+                                            <svg
+                                                viewBox="0 0 24 24"
+                                                fill="currentColor"
+                                            >
+                                                <path
+                                                    d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z"
+                                                />
+                                                <text
+                                                    x="15.5"
+                                                    y="15.5"
+                                                    font-size="5"
+                                                    font-weight="bold"
+                                                    fill="currentColor"
+                                                    text-anchor="middle"
+                                                    >10</text
+                                                >
+                                            </svg>
+                                        </button>
+
+                                        <!-- Volume -->
+                                        <div class="volume-group">
+                                            <button
+                                                class="ctrl-btn"
+                                                on:click={toggleMute}
+                                                aria-label="Toggle mute"
+                                            >
+                                                {#if isMuted || volume === 0}
+                                                    <!-- Muted -->
+                                                    <svg
+                                                        viewBox="0 0 24 24"
+                                                        fill="currentColor"
+                                                    >
+                                                        <path
+                                                            d="M16.5 12A4.5 4.5 0 0 0 14 7.97v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"
+                                                        />
+                                                    </svg>
+                                                {:else if volume < 0.5}
+                                                    <!-- Low volume -->
+                                                    <svg
+                                                        viewBox="0 0 24 24"
+                                                        fill="currentColor"
+                                                    >
+                                                        <path
+                                                            d="M18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM5 9v6h4l5 5V4L9 9H5z"
+                                                        />
+                                                    </svg>
+                                                {:else}
+                                                    <!-- Full volume -->
+                                                    <svg
+                                                        viewBox="0 0 24 24"
+                                                        fill="currentColor"
+                                                    >
+                                                        <path
+                                                            d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"
+                                                        />
+                                                    </svg>
+                                                {/if}
+                                            </button>
+                                            <input
+                                                type="range"
+                                                class="volume-slider"
+                                                min="0"
+                                                max="1"
+                                                step="0.05"
+                                                bind:value={volume}
+                                                on:input={onVolumeChange}
+                                                aria-label="Volume"
+                                            />
+                                        </div>
+
+                                        <!-- Time display -->
+                                        <span class="time-display">
+                                            {formatTime(currentTime)} / {formatTime(
+                                                duration,
+                                            )}
+                                        </span>
+                                    </div>
+
+                                    <!-- Right side -->
+                                    <div class="controls-right">
+                                        <!-- Fullscreen -->
+                                        <button
+                                            class="ctrl-btn"
+                                            on:click={toggleFullscreen}
+                                            aria-label="Fullscreen"
+                                        >
+                                            {#if isFullscreen}
+                                                <svg
+                                                    viewBox="0 0 24 24"
+                                                    fill="currentColor"
+                                                >
+                                                    <path
+                                                        d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"
+                                                    />
+                                                </svg>
+                                            {:else}
+                                                <svg
+                                                    viewBox="0 0 24 24"
+                                                    fill="currentColor"
+                                                >
+                                                    <path
+                                                        d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"
+                                                    />
+                                                </svg>
+                                            {/if}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     {:else}
                         <img
                             src={project.mediaUrl}
@@ -188,29 +630,6 @@
                     </div>
 
                     <div class="details-actions">
-                        <a
-                            href={project.websiteUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="action-btn primary"
-                        >
-                            <svg
-                                width="18"
-                                height="18"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                            >
-                                <circle cx="12" cy="12" r="10" />
-                                <line x1="2" y1="12" x2="22" y2="12" />
-                                <path
-                                    d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
-                                />
-                            </svg>
-                            <span>Visit Website</span>
-                        </a>
-
                         <a
                             href={project.githubUrl}
                             target="_blank"
@@ -349,7 +768,6 @@
         height: 12px;
         border-radius: 50%;
     }
-
     .dot.red {
         background: #ff5f57;
     }
@@ -375,12 +793,239 @@
     .frame-content {
         aspect-ratio: 16 / 9;
         overflow: hidden;
+        position: relative;
+        background: #000;
     }
 
     .hero-media {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        display: block;
+    }
+
+    /* ── Custom Video Player ── */
+    .video-player {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background: #000;
+        cursor: default;
+    }
+
+    .video-player.hide-cursor {
+        cursor: none;
+    }
+
+    /* Center Play Button */
+    .center-play {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.35);
+        border: none;
+        cursor: pointer;
+        z-index: 5;
+        transition: background 0.2s ease;
+    }
+    .center-play:hover {
+        background: rgba(0, 0, 0, 0.5);
+    }
+    .center-play svg {
+        width: 72px;
+        height: 72px;
+        color: #fff;
+        filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.7));
+        transition: transform 0.2s ease;
+    }
+    .center-play:hover svg {
+        transform: scale(1.1);
+    }
+
+    /* Controls bar */
+    .controls {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 10;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.85) 100%);
+        padding: 40px 16px 12px;
+        opacity: 0;
+        transform: translateY(4px);
+        transition:
+            opacity 0.3s ease,
+            transform 0.3s ease;
+        pointer-events: none;
+    }
+    .controls.visible {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: all;
+    }
+
+    /* Progress Area */
+    .progress-area {
+        cursor: pointer;
+        padding: 8px 0;
+        margin-bottom: 8px;
+    }
+
+    .progress-track {
+        position: relative;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 99px;
+        overflow: visible;
+        transition: height 0.15s ease;
+    }
+
+    .progress-area:hover .progress-track {
+        height: 6px;
+    }
+
+    .progress-buffered {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 99px;
+        transition: width 0.3s linear;
+    }
+
+    .progress-played {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, #a855f7, #6366f1);
+        border-radius: 99px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        transition: width 0.1s linear;
+    }
+
+    .progress-thumb {
+        width: 14px;
+        height: 14px;
+        background: #fff;
+        border-radius: 50%;
+        box-shadow: 0 0 6px rgba(168, 85, 247, 0.8);
+        transform: scale(0);
+        transition: transform 0.15s ease;
+        flex-shrink: 0;
+        margin-right: -7px;
+    }
+
+    .progress-area:hover .progress-thumb {
+        transform: scale(1);
+    }
+
+    /* Controls Row */
+    .controls-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .controls-left,
+    .controls-right {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* Control Buttons */
+    .ctrl-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #fff;
+        border-radius: 6px;
+        transition:
+            background 0.2s ease,
+            transform 0.15s ease;
+        padding: 0;
+    }
+    .ctrl-btn:hover {
+        background: rgba(255, 255, 255, 0.12);
+        transform: scale(1.1);
+    }
+    .ctrl-btn svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* Volume Group */
+    .volume-group {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+    }
+
+    .volume-slider {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 0;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 99px;
+        outline: none;
+        cursor: pointer;
+        overflow: hidden;
+        max-width: 0;
+        opacity: 0;
+        transition:
+            max-width 0.3s ease,
+            opacity 0.3s ease;
+    }
+
+    .volume-group:hover .volume-slider {
+        max-width: 80px;
+        width: 80px;
+        opacity: 1;
+    }
+
+    .volume-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 12px;
+        height: 12px;
+        background: #fff;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: -80px 0 0 78px #a855f7;
+    }
+
+    .volume-slider::-moz-range-thumb {
+        width: 12px;
+        height: 12px;
+        background: #fff;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+    }
+
+    /* Time Display */
+    .time-display {
+        font-size: 0.82rem;
+        color: #fff;
+        font-weight: 500;
+        white-space: nowrap;
+        margin-left: 4px;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.02em;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
     }
 
     /* Content Grid */
@@ -391,7 +1036,6 @@
         align-items: start;
     }
 
-    /* Info Column */
     .info-column {
         padding-right: 20px;
     }
@@ -503,32 +1147,11 @@
         transition: all 0.3s ease;
     }
 
-    .action-btn.primary {
-        background: linear-gradient(
-            135deg,
-            rgba(99, 102, 241, 0.15) 0%,
-            rgba(139, 92, 246, 0.15) 100%
-        );
-        border: 1px solid rgba(99, 102, 241, 0.3);
-        color: #ffffff;
-    }
-
-    .action-btn.primary:hover {
-        background: linear-gradient(
-            135deg,
-            rgba(99, 102, 241, 0.25) 0%,
-            rgba(139, 92, 246, 0.25) 100%
-        );
-        border-color: rgba(99, 102, 241, 0.5);
-        transform: translateY(-2px);
-    }
-
     .action-btn.secondary {
         background: rgba(255, 255, 255, 0.03);
         border: 1px solid rgba(255, 255, 255, 0.1);
         color: #d1d5db;
     }
-
     .action-btn.secondary:hover {
         background: rgba(255, 255, 255, 0.06);
         border-color: rgba(255, 255, 255, 0.2);
@@ -540,17 +1163,14 @@
         .page-content {
             padding: 0 24px;
         }
-
         .content-grid {
             grid-template-columns: 1fr;
             gap: 40px;
         }
-
         .details-column {
             position: relative;
             top: 0;
         }
-
         .info-column {
             padding-right: 0;
         }
@@ -559,52 +1179,49 @@
     /* Responsive - Mobile */
     @media (max-width: 768px) {
         .page-nav {
-            padding: 20px 20px;
+            padding: 20px;
         }
-
         .page-content {
             padding: 0 20px;
         }
-
         .media-hero {
             margin-bottom: 40px;
         }
-
         .media-frame {
             border-radius: 12px;
         }
-
         .frame-header {
             padding: 10px 16px;
         }
-
         .dot {
             width: 10px;
             height: 10px;
         }
-
         .frame-url {
             font-size: 0.75rem;
             padding: 6px 12px;
         }
-
         .project-title {
             font-size: 1.8rem;
             margin-bottom: 24px;
         }
-
         .project-description p {
             font-size: 1rem;
         }
-
         .tag {
             padding: 6px 14px;
             font-size: 0.85rem;
         }
-
         .details-card {
             padding: 24px;
             border-radius: 16px;
+        }
+        .time-display {
+            font-size: 0.75rem;
+        }
+        .volume-group:hover .volume-slider {
+            max-width: 60px;
+            width: 60px;
         }
     }
 
@@ -613,57 +1230,60 @@
         .page-nav {
             padding: 16px;
         }
-
         .back-link {
             padding: 8px 12px;
             font-size: 0.9rem;
         }
-
         .page-content {
             padding: 0 16px;
         }
-
         .frame-header {
             gap: 10px;
         }
-
         .frame-url span {
             display: none;
         }
-
         .project-title {
             font-size: 1.5rem;
         }
-
         .project-description {
             gap: 16px;
             margin-bottom: 30px;
         }
-
         .project-description p {
             font-size: 0.95rem;
         }
-
         .project-tags {
             gap: 8px;
         }
-
         .tag {
             padding: 5px 12px;
             font-size: 0.8rem;
         }
-
         .details-card {
             padding: 20px;
         }
-
         .details-title {
             font-size: 1.15rem;
         }
-
         .action-btn {
             padding: 14px 20px;
             font-size: 0.9rem;
+        }
+        .ctrl-btn {
+            width: 30px;
+            height: 30px;
+        }
+        .ctrl-btn svg {
+            width: 17px;
+            height: 17px;
+        }
+        .center-play svg {
+            width: 52px;
+            height: 52px;
+        }
+        .time-display {
+            display: none;
         }
     }
 </style>

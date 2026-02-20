@@ -67,7 +67,6 @@ export const translations = {
             skills: 'Skills',
             projects: 'Projects',
             experience: 'Experience',
-            blog: 'Blog',
             contact: 'Contact'
         },
         // Home
@@ -130,16 +129,6 @@ export const translations = {
             contract: 'Contract',
             internship: 'Internship'
         },
-        // Blog
-        blog: {
-            label: 'Blog',
-            title: 'Latest',
-            titleHighlight: 'Articles',
-            subtitle: 'Thoughts, tutorials, and insights from my journey in web development',
-            readArticle: 'Read Article',
-            viewAll: 'View All Articles',
-            minRead: 'min read'
-        },
         // Contact
         contact: {
             label: 'Contact',
@@ -169,7 +158,6 @@ export const translations = {
             skills: 'Keahlian',
             projects: 'Proyek',
             experience: 'Pengalaman',
-            blog: 'Blog',
             contact: 'Kontak'
         },
         // Home
@@ -231,16 +219,6 @@ export const translations = {
             fullTime: 'Full-time',
             contract: 'Kontrak',
             internship: 'Magang'
-        },
-        // Blog
-        blog: {
-            label: 'Blog',
-            title: 'Artikel',
-            titleHighlight: 'Terbaru',
-            subtitle: 'Pemikiran, tutorial, dan wawasan dari perjalanan saya dalam pengembangan web',
-            readArticle: 'Baca Artikel',
-            viewAll: 'Lihat Semua Artikel',
-            minRead: 'menit baca'
         },
         // Contact
         contact: {

@@ -8,32 +8,33 @@
     let formContainer;
     let contactInfo = [];
 
-    const contacts = [
-        {
-            icon: "📧",
-            label: "Email",
-            value: "hello@zaky.dev",
-            link: "mailto:hello@zaky.dev",
-        },
-        {
-            icon: "📍",
-            label: "Location",
-            value: "Indonesia",
-            link: null,
-        },
-        {
-            icon: "💼",
-            label: "LinkedIn",
-            value: "linkedin.com/in/zaky",
-            link: "https://linkedin.com",
-        },
-    ];
+const contacts = [
+    {
+        type: "email",
+        label: "Email",
+        value: "zakytaufiq24@gmail.com",
+        link: null,
+    },
+    {
+        type: "location",
+        label: "Location",
+        value: "Lampung, Indonesia",
+        link: null,
+    },
+    {
+        type: "phone",
+        label: "Telp",
+        value: "+62 813 2929 6784",
+        link: null,
+    },
+];
+
 
     const socials = [
-        { name: "GitHub", icon: "gh", link: "#" },
-        { name: "Twitter", icon: "tw", link: "#" },
-        { name: "LinkedIn", icon: "li", link: "#" },
-        { name: "Instagram", icon: "ig", link: "#" },
+        { name: "GitHub", icon: "gh", link: "https://github.com/kytaufiq" },
+        { name: "Twitter", icon: "tw", link: "https://x.com/ZakyTaufiq24" },
+        { name: "LinkedIn", icon: "li", link: "https://www.linkedin.com/in/zaky-taufiqurrahman/" },
+        { name: "Instagram", icon: "ig", link: "https://www.instagram.com/taufiqrzaky/" },
     ];
 
     onMount(() => {
@@ -123,7 +124,37 @@
                 <div class="contact-cards">
                     {#each contacts as contact, i}
                         <div bind:this={contactInfo[i]} class="contact-card">
-                            <span class="contact-icon">{contact.icon}</span>
+                            <span class="contact-icon">
+                                {#if contact.type === "email"}
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <rect x="3" y="5" width="18" height="14" rx="3"/>
+                                        <path d="M3 7l9 6 9-6"/>
+                                    </svg>
+
+                                {:else if contact.type === "location"}
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path d="M12 21s-6-5.5-6-10a6 6 0 1112 0c0 4.5-6 10-6 10z"/>
+                                        <circle cx="12" cy="11" r="2.5"/>
+                                    </svg>
+
+                                {:else if contact.type === "phone"}
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path d="M22 16.92V21a2 2 0 01-2.18 2 
+                                                19.86 19.86 0 01-8.63-3.07 
+                                                19.5 19.5 0 01-6-6 
+                                                19.86 19.86 0 01-3.07-8.67 
+                                                A2 2 0 014 2h4.09 
+                                                a2 2 0 012 1.72 
+                                                c.12.9.32 1.77.59 2.6 
+                                                a2 2 0 01-.45 2.11L9 9 
+                                                a16 16 0 006 6l.57-.23 
+                                                a2 2 0 012.11.45 
+                                                c.83.27 1.7.47 2.6.59 
+                                                a2 2 0 011.72 2z"/>
+                                    </svg>
+                                {/if}
+                            </span>
+
                             <div class="contact-details">
                                 <span class="contact-label"
                                     >{contact.label}</span
@@ -373,15 +404,44 @@
     }
 
     .contact-icon {
-        font-size: 1.8rem;
-        width: 56px;
-        height: 56px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(99, 102, 241, 0.1);
-        border-radius: 14px;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: radial-gradient(
+        circle at 30% 30%,
+        rgba(99, 102, 241, 0.15),
+        rgba(15, 15, 25, 0.9)
+    );
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    color: #cbd5ff;
+
+    box-shadow:
+        0 0 30px rgba(99, 102, 241, 0.15),
+        inset 0 0 20px rgba(99, 102, 241, 0.05);
+
+    transition: all 0.3s ease;
     }
+
+    .contact-icon svg {
+        width: 26px;
+        height: 26px;
+    }
+
+    .contact-card:hover .contact-icon {
+    transform: scale(1.1);
+    box-shadow:
+        0 0 40px rgba(99, 102, 241, 0.4),
+        inset 0 0 25px rgba(99, 102, 241, 0.1);
+}
+
+
 
     .contact-details {
         display: flex;

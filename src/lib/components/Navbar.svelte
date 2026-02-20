@@ -20,7 +20,6 @@
         { href: "#skills", key: "skills" },
         { href: "#projects", key: "projects" },
         { href: "#experience", key: "experience" },
-        { href: "#blog", key: "blog" },
         { href: "#contact", key: "contact" },
     ];
 
@@ -541,10 +540,6 @@
         height: 42px;
     }
 
-    .theme-btn .btn-content {
-        padding: 0;
-    }
-
     .theme-icon-wrapper {
         display: flex;
         align-items: center;
@@ -704,11 +699,6 @@
             padding: 8px 10px;
         }
 
-        .theme-toggle {
-            width: 38px;
-            height: 38px;
-        }
-
         .hamburger {
             width: 34px;
             height: 34px;
@@ -741,30 +731,6 @@
             font-size: 1rem;
         }
 
-        .nav-controls {
-            gap: 6px;
-        }
-
-        .lang-btn .btn-content {
-            padding: 6px 8px;
-            font-size: 0.75rem;
-        }
-
-        .lang-btn .btn-content svg {
-            width: 14px;
-            height: 14px;
-        }
-
-        .theme-toggle {
-            width: 34px;
-            height: 34px;
-        }
-
-        .theme-toggle svg {
-            width: 16px;
-            height: 16px;
-        }
-
         .hamburger {
             width: 32px;
             height: 32px;
@@ -786,11 +752,6 @@
 
         .lang-btn span:not(.btn-content):not(:last-child) {
             display: none;
-        }
-
-        .theme-toggle {
-            width: 32px;
-            height: 32px;
         }
     }
 </style>
