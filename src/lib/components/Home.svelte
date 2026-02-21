@@ -2,6 +2,10 @@
     import { onMount } from "svelte";
     import gsap from "gsap";
     import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+    import { language, translations } from "$lib/stores.js";
+
+    $: currentLang = $language;
+    $: t = translations[currentLang];
 
     let heroSection;
     let titleLines = [];
@@ -167,25 +171,24 @@
         <div class="hero-content">
             <div class="hero-badge">
                 <span class="badge-dot"></span>
-                Available for freelance work
+                {t.home.badge}
             </div>
 
             <h1 class="hero-title">
                 <span bind:this={titleLines[0]} class="title-line"
-                    >Hi, I'm <span class="gradient-text">Zaky</span></span
+                    >{t.home.greeting}
+                    <span class="gradient-text">{t.home.name}</span></span
                 >
                 <span bind:this={titleLines[1]} class="title-line"
-                    >Creative Developer</span
+                    >{t.home.title1}</span
                 >
                 <span bind:this={titleLines[2]} class="title-line accent"
-                    >& Designer</span
+                    >{t.home.title2}</span
                 >
             </h1>
 
             <p bind:this={subtitle} class="hero-subtitle">
-                I craft beautiful, interactive web experiences with modern
-                technologies. Turning complex ideas into elegant, user-friendly
-                solutions.
+                {t.home.subtitle}
             </p>
 
             <div bind:this={buttons} class="hero-buttons">
@@ -202,7 +205,7 @@
                         <polyline points="10 17 15 12 10 7" />
                         <line x1="15" y1="12" x2="3" y2="12" />
                     </svg>
-                    View Projects
+                    {t.home.viewProjects}
                 </a>
                 <a href="#contact" class="btn btn-secondary">
                     <svg
@@ -218,24 +221,24 @@
                         />
                         <polyline points="22,6 12,13 2,6" />
                     </svg>
-                    Contact Me
+                    {t.home.contactMe}
                 </a>
             </div>
 
             <div bind:this={stats} class="hero-stats">
                 <div class="stat">
                     <span class="stat-number">3+</span>
-                    <span class="stat-label">Years Experience</span>
+                    <span class="stat-label">{t.home.yearsExp}</span>
                 </div>
                 <div class="stat-divider"></div>
                 <div class="stat">
                     <span class="stat-number">50+</span>
-                    <span class="stat-label">Projects Completed</span>
+                    <span class="stat-label">{t.home.projectsCompleted}</span>
                 </div>
                 <div class="stat-divider"></div>
                 <div class="stat">
                     <span class="stat-number">30+</span>
-                    <span class="stat-label">Happy Clients</span>
+                    <span class="stat-label">{t.home.happyClients}</span>
                 </div>
             </div>
         </div>
@@ -311,7 +314,7 @@
 
     <!-- Scroll Indicator (matching the design) -->
     <div class="scroll-indicator">
-        <span class="scroll-text">Scroll to explore</span>
+        <span class="scroll-text">{t.home.scroll}</span>
         <div class="scroll-arrow">
             <svg
                 width="20"
@@ -397,7 +400,7 @@
     }
 
     .title-line.accent {
-        color: #a1a1aa;
+        color: var(--text-secondary);
         font-weight: 500;
     }
 
@@ -415,7 +418,7 @@
 
     .hero-subtitle {
         font-size: 1rem;
-        color: #a1a1aa;
+        color: var(--text-secondary);
         line-height: 1.7;
         max-width: 440px;
         margin-bottom: 24px;
@@ -453,9 +456,9 @@
     }
 
     .btn-secondary {
-        background: rgba(255, 255, 255, 0.05);
-        color: #ffffff;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: var(--bg-card);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
     }
 
     .btn-secondary:hover {
@@ -479,15 +482,12 @@
         font-family: "Space Grotesk", sans-serif;
         font-size: 1.6rem;
         font-weight: 700;
-        background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        color: var(--text-primary);
     }
 
     .stat-label {
         font-size: 0.8rem;
-        color: #71717a;
+        color: var(--text-muted);
     }
 
     .stat-divider {
@@ -741,7 +741,7 @@
 
     .scroll-text {
         font-size: 0.9rem;
-        color: #9ca3af;
+        color: var(--text-secondary);
         letter-spacing: 0.5px;
     }
 
@@ -749,7 +749,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #9ca3af;
+        color: var(--text-secondary);
         animation: bounce 2s ease-in-out infinite;
     }
 
@@ -908,11 +908,6 @@
 
         .code-content {
             padding: 12px 10px;
-        }
-
-        .status-bar {
-            padding: 6px 10px;
-            font-size: 0.65rem;
         }
 
         .floating-icon {

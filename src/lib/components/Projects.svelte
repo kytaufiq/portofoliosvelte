@@ -3,6 +3,10 @@
     import gsap from "gsap";
     import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
     import { projects } from "$lib/projectsData.js";
+    import { language, translations } from "$lib/stores.js";
+
+    $: currentLang = $language;
+    $: t = translations[currentLang];
 
     // Parse startTime: angka detik (90) atau string "menit:detik" ("1:30")
     function parseStartTime(startTime) {
@@ -114,11 +118,11 @@
     <div class="container">
         <div bind:this={header} class="section-header">
             <h2 class="section-title">
-                Featured <span class="gradient-text">Projects</span>
+                {t.projects.title}
+                <span class="gradient-text">{t.projects.titleHighlight}</span>
             </h2>
             <p class="section-subtitle">
-                A selection of my recent work, ranging from web applications to
-                interactive 3D experiments.
+                {t.projects.subtitle}
             </p>
         </div>
 
@@ -177,7 +181,11 @@
                                                 y2="3"
                                             />
                                         </svg>
-                                        <span>View Project</span>
+                                        <span
+                                            >{currentLang === "EN"
+                                                ? "View Project"
+                                                : "Lihat Proyek"}</span
+                                        >
                                     </div>
                                 </div>
                             </div>
@@ -243,7 +251,7 @@
         font-size: clamp(2.5rem, 6vw, 4rem);
         font-weight: 700;
         margin-bottom: 20px;
-        color: #ffffff;
+        color: var(--text-primary);
         font-style: italic;
     }
 
@@ -261,7 +269,7 @@
 
     .section-subtitle {
         font-size: 1.15rem;
-        color: #a1a1aa;
+        color: var(--text-secondary);
         max-width: 700px;
         margin: 0 auto;
         font-style: italic;
@@ -289,8 +297,8 @@
         position: relative;
         border-radius: 16px;
         overflow: hidden;
-        background: rgba(20, 20, 30, 0.8);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
         margin-bottom: 24px;
     }
 
@@ -404,7 +412,7 @@
         font-family: "Space Grotesk", sans-serif;
         font-size: 1.6rem;
         font-weight: 700;
-        color: #ffffff;
+        color: var(--text-primary);
         margin-bottom: 16px;
         transition: color 0.3s ease;
     }
@@ -426,13 +434,13 @@
         border: 1px solid rgba(99, 102, 241, 0.2);
         border-radius: 100px;
         font-size: 0.8rem;
-        color: #a1a1aa;
+        color: var(--text-secondary);
         transition: all 0.3s ease;
     }
 
     .project-card:hover .tag {
         border-color: rgba(99, 102, 241, 0.4);
-        color: #d1d1d6;
+        color: var(--text-primary);
     }
 
     .tag-more {
@@ -443,7 +451,7 @@
 
     .project-description {
         font-size: 1rem;
-        color: #d1d5db;
+        color: var(--text-secondary);
         line-height: 1.6;
         margin-bottom: 16px;
         font-weight: 500;
@@ -457,7 +465,7 @@
 
     .meta-paragraph {
         font-size: 0.9rem;
-        color: #9ca3af;
+        color: var(--text-muted);
         line-height: 1.7;
     }
 

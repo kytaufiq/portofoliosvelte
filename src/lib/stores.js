@@ -135,19 +135,22 @@ export const translations = {
             title: "Let's Work",
             titleHighlight: 'Together',
             subtitle: "Have a project in mind? I'd love to hear from you. Let's create something amazing!",
+            infoTitle: 'Get in Touch',
+            infoText: "I'm currently available for freelance projects and full-time opportunities. Feel free to reach out if you want to collaborate or just say hi!",
             getInTouch: 'Get in Touch',
             description: "I'm currently available for freelance projects and full-time opportunities. Feel free to reach out if you want to collaborate or just say hi!",
             email: 'Email',
             location: 'Location',
             linkedin: 'LinkedIn',
             followMe: 'Follow me on',
-            yourName: 'Your Name',
-            emailAddress: 'Email Address',
-            subject: 'Subject',
-            message: 'Message',
-            messagePlaceholder: 'Tell me about your project...',
-            sendMessage: 'Send Message',
-            copyright: 'Crafted with 💜 using Svelte & GSAP'
+            form: {
+                name: 'Your Name',
+                email: 'Email Address',
+                subject: 'Subject',
+                message: 'Message',
+                send: 'Send Message'
+            },
+            footer: 'Crafted with 💜 using Svelte & GSAP'
         }
     },
     ID: {
@@ -226,19 +229,22 @@ export const translations = {
             title: 'Mari Bekerja',
             titleHighlight: 'Bersama',
             subtitle: 'Punya proyek dalam pikiran? Saya senang mendengar dari Anda. Mari ciptakan sesuatu yang luar biasa!',
+            infoTitle: 'Hubungi Saya',
+            infoText: 'Saya saat ini tersedia untuk proyek freelance dan kesempatan full-time. Jangan ragu untuk menghubungi jika ingin berkolaborasi atau sekedar menyapa!',
             getInTouch: 'Hubungi Saya',
             description: 'Saya saat ini tersedia untuk proyek freelance dan kesempatan full-time. Jangan ragu untuk menghubungi jika ingin berkolaborasi atau sekedar menyapa!',
             email: 'Email',
             location: 'Lokasi',
             linkedin: 'LinkedIn',
             followMe: 'Ikuti saya di',
-            yourName: 'Nama Anda',
-            emailAddress: 'Alamat Email',
-            subject: 'Subjek',
-            message: 'Pesan',
-            messagePlaceholder: 'Ceritakan tentang proyek Anda...',
-            sendMessage: 'Kirim Pesan',
-            copyright: 'Dibuat dengan 💜 menggunakan Svelte & GSAP'
+            form: {
+                name: 'Nama Anda',
+                email: 'Alamat Email',
+                subject: 'Subjek',
+                message: 'Pesan',
+                send: 'Kirim Pesan'
+            },
+            footer: 'Dibuat dengan 💜 menggunakan Svelte & GSAP'
         }
     }
 };

@@ -4,7 +4,7 @@
 export const projects = [
     {
         id: 1,
-        slug: 'dafdev-portfolio',
+        slug: 'diltify',
         title: 'DILTIFY Music Player',
         description: [
             'DILTIFY Music Player is a web-based music player built using Next.js and modern web technologies.',

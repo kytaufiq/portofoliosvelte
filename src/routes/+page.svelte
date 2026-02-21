@@ -14,6 +14,7 @@
   let cursorCtx;
   let animationId;
   let cursorAnimationId;
+  let isMobile = false;
 
   // ── Stars ────────────────────────────────────────────────────────
   const stars = [];
@@ -285,18 +286,28 @@
   }
 
   onMount(() => {
+    // Detect touch/mobile device
+    isMobile =
+      window.matchMedia("(max-width: 900px)").matches ||
+      "ontouchstart" in window ||
+      navigator.maxTouchPoints > 0;
+
     starsCtx = starsCanvas.getContext("2d");
-    cursorCtx = cursorCanvas.getContext("2d");
 
     resizeCanvas();
     initStars();
-    initTrail();
     animateStars();
-    animateCursor();
     scheduleMeteor();
 
     window.addEventListener("resize", resizeCanvas);
-    window.addEventListener("mousemove", handleMouseMove);
+
+    // Only initialize cursor trail on non-touch desktop devices
+    if (!isMobile) {
+      cursorCtx = cursorCanvas.getContext("2d");
+      initTrail();
+      animateCursor();
+      window.addEventListener("mousemove", handleMouseMove);
+    }
   });
 
   onDestroy(() => {
@@ -305,7 +316,9 @@
     if (meteorTimer) clearTimeout(meteorTimer);
     if (typeof window !== "undefined") {
       window.removeEventListener("resize", resizeCanvas);
-      window.removeEventListener("mousemove", handleMouseMove);
+      if (!isMobile) {
+        window.removeEventListener("mousemove", handleMouseMove);
+      }
     }
   });
 </script>
@@ -355,6 +368,12 @@
     inset: 0;
     pointer-events: none;
     z-index: 9999;
+  }
+
+  @media (max-width: 900px) {
+    .cursor-canvas {
+      display: none;
+    }
   }
 
   .global-bg {

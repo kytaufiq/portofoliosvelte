@@ -2,39 +2,53 @@
     import { onMount } from "svelte";
     import gsap from "gsap";
     import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+    import { language, translations } from "$lib/stores.js";
+
+    $: currentLang = $language;
+    $: t = translations[currentLang];
 
     let section;
     let header;
     let formContainer;
     let contactInfo = [];
 
-const contacts = [
-    {
-        type: "email",
-        label: "Email",
-        value: "zakytaufiq24@gmail.com",
-        link: null,
-    },
-    {
-        type: "location",
-        label: "Location",
-        value: "Lampung, Indonesia",
-        link: null,
-    },
-    {
-        type: "phone",
-        label: "Telp",
-        value: "+62 813 2929 6784",
-        link: null,
-    },
-];
-
+    const contacts = [
+        {
+            type: "email",
+            label: "Email",
+            labelID: "Email",
+            value: "zakytaufiq24@gmail.com",
+            link: null,
+        },
+        {
+            type: "location",
+            label: "Location",
+            labelID: "Lokasi",
+            value: "Lampung, Indonesia",
+            link: null,
+        },
+        {
+            type: "phone",
+            label: "Phone",
+            labelID: "Telepon",
+            value: "+62 813 2929 6784",
+            link: null,
+        },
+    ];
 
     const socials = [
         { name: "GitHub", icon: "gh", link: "https://github.com/kytaufiq" },
         { name: "Twitter", icon: "tw", link: "https://x.com/ZakyTaufiq24" },
-        { name: "LinkedIn", icon: "li", link: "https://www.linkedin.com/in/zaky-taufiqurrahman/" },
-        { name: "Instagram", icon: "ig", link: "https://www.instagram.com/taufiqrzaky/" },
+        {
+            name: "LinkedIn",
+            icon: "li",
+            link: "https://www.linkedin.com/in/zaky-taufiqurrahman/",
+        },
+        {
+            name: "Instagram",
+            icon: "ig",
+            link: "https://www.instagram.com/taufiqrzaky/",
+        },
     ];
 
     onMount(() => {
@@ -94,31 +108,32 @@ const contacts = [
 
     function handleSubmit(e) {
         e.preventDefault();
-        // Handle form submission
-        alert("Thank you for your message! I'll get back to you soon.");
+        alert(
+            currentLang === "EN"
+                ? "Thank you for your message! I'll get back to you soon."
+                : "Terima kasih atas pesan Anda! Saya akan segera menghubungi Anda.",
+        );
     }
 </script>
 
 <section id="contact" bind:this={section}>
     <div class="container">
         <div bind:this={header} class="section-header">
-            <div class="section-label">Contact</div>
+            <div class="section-label">{t.contact.label}</div>
             <h2 class="section-title">
-                Let's Work <span class="gradient-text">Together</span>
+                {t.contact.title}
+                <span class="gradient-text">{t.contact.titleHighlight}</span>
             </h2>
             <p class="section-subtitle">
-                Have a project in mind? I'd love to hear from you. Let's create
-                something amazing!
+                {t.contact.subtitle}
             </p>
         </div>
 
         <div class="contact-grid">
             <div class="contact-info">
-                <h3 class="info-title">Get in Touch</h3>
+                <h3 class="info-title">{t.contact.infoTitle}</h3>
                 <p class="info-text">
-                    I'm currently available for freelance projects and full-time
-                    opportunities. Feel free to reach out if you want to
-                    collaborate or just say hi!
+                    {t.contact.infoText}
                 </p>
 
                 <div class="contact-cards">
@@ -126,20 +141,42 @@ const contacts = [
                         <div bind:this={contactInfo[i]} class="contact-card">
                             <span class="contact-icon">
                                 {#if contact.type === "email"}
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                        <rect x="3" y="5" width="18" height="14" rx="3"/>
-                                        <path d="M3 7l9 6 9-6"/>
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="1.8"
+                                    >
+                                        <rect
+                                            x="3"
+                                            y="5"
+                                            width="18"
+                                            height="14"
+                                            rx="3"
+                                        />
+                                        <path d="M3 7l9 6 9-6" />
                                     </svg>
-
                                 {:else if contact.type === "location"}
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                        <path d="M12 21s-6-5.5-6-10a6 6 0 1112 0c0 4.5-6 10-6 10z"/>
-                                        <circle cx="12" cy="11" r="2.5"/>
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="1.8"
+                                    >
+                                        <path
+                                            d="M12 21s-6-5.5-6-10a6 6 0 1112 0c0 4.5-6 10-6 10z"
+                                        />
+                                        <circle cx="12" cy="11" r="2.5" />
                                     </svg>
-
                                 {:else if contact.type === "phone"}
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                        <path d="M22 16.92V21a2 2 0 01-2.18 2 
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="1.8"
+                                    >
+                                        <path
+                                            d="M22 16.92V21a2 2 0 01-2.18 2 
                                                 19.86 19.86 0 01-8.63-3.07 
                                                 19.5 19.5 0 01-6-6 
                                                 19.86 19.86 0 01-3.07-8.67 
@@ -150,14 +187,17 @@ const contacts = [
                                                 a16 16 0 006 6l.57-.23 
                                                 a2 2 0 012.11.45 
                                                 c.83.27 1.7.47 2.6.59 
-                                                a2 2 0 011.72 2z"/>
+                                                a2 2 0 011.72 2z"
+                                        />
                                     </svg>
                                 {/if}
                             </span>
 
                             <div class="contact-details">
                                 <span class="contact-label"
-                                    >{contact.label}</span
+                                    >{currentLang === "EN"
+                                        ? contact.label
+                                        : contact.labelID}</span
                                 >
                                 {#if contact.link}
                                     <a href={contact.link} class="contact-value"
@@ -174,7 +214,7 @@ const contacts = [
                 </div>
 
                 <div class="social-links">
-                    <p class="social-label">Follow me on</p>
+                    <p class="social-label">{t.contact.followMe}</p>
                     <div class="socials">
                         {#each socials as social}
                             <a
@@ -236,45 +276,53 @@ const contacts = [
             <div bind:this={formContainer} class="contact-form-wrapper">
                 <form class="contact-form" on:submit={handleSubmit}>
                     <div class="form-group">
-                        <label for="name">Your Name</label>
+                        <label for="name">{t.contact.form.name}</label>
                         <input
                             type="text"
                             id="name"
                             name="name"
-                            placeholder="John Doe"
+                            placeholder={currentLang === "EN"
+                                ? "John Doe"
+                                : "Nama Anda"}
                             required
                         />
                     </div>
 
                     <div class="form-group">
-                        <label for="email">Email Address</label>
+                        <label for="email">{t.contact.form.email}</label>
                         <input
                             type="email"
                             id="email"
                             name="email"
-                            placeholder="john@example.com"
+                            placeholder={currentLang === "EN"
+                                ? "john@example.com"
+                                : "nama@contoh.com"}
                             required
                         />
                     </div>
 
                     <div class="form-group">
-                        <label for="subject">Subject</label>
+                        <label for="subject">{t.contact.form.subject}</label>
                         <input
                             type="text"
                             id="subject"
                             name="subject"
-                            placeholder="Project Inquiry"
+                            placeholder={currentLang === "EN"
+                                ? "Project Inquiry"
+                                : "Pertanyaan Proyek"}
                             required
                         />
                     </div>
 
                     <div class="form-group">
-                        <label for="message">Message</label>
+                        <label for="message">{t.contact.form.message}</label>
                         <textarea
                             id="message"
                             name="message"
                             rows="5"
-                            placeholder="Tell me about your project..."
+                            placeholder={currentLang === "EN"
+                                ? "Tell me about your project..."
+                                : "Ceritakan tentang proyek Anda..."}
                             required
                         ></textarea>
                     </div>
@@ -291,7 +339,7 @@ const contacts = [
                             <line x1="22" y1="2" x2="11" y2="13" />
                             <polygon points="22 2 15 22 11 13 2 9 22 2" />
                         </svg>
-                        Send Message
+                        {t.contact.form.send}
                     </button>
                 </form>
             </div>
@@ -301,7 +349,7 @@ const contacts = [
     <footer class="footer">
         <div class="container">
             <p class="copyright">
-                © 2024 Zaky. Crafted with 💜 using Svelte & GSAP
+                © 2026 Zaky Taufiq. All Right Reserved.
             </p>
         </div>
     </footer>
@@ -341,7 +389,7 @@ const contacts = [
         font-size: clamp(2rem, 5vw, 3rem);
         font-weight: 700;
         margin-bottom: 16px;
-        color: #ffffff;
+        color: var(--text-primary);
     }
 
     .gradient-text {
@@ -353,7 +401,7 @@ const contacts = [
 
     .section-subtitle {
         font-size: 1.1rem;
-        color: #a1a1aa;
+        color: var(--text-secondary);
         max-width: 600px;
         margin: 0 auto;
     }
@@ -369,13 +417,13 @@ const contacts = [
         font-family: "Space Grotesk", sans-serif;
         font-size: 1.8rem;
         font-weight: 600;
-        color: #ffffff;
+        color: var(--text-primary);
         margin-bottom: 16px;
     }
 
     .info-text {
         font-size: 1rem;
-        color: #a1a1aa;
+        color: var(--text-secondary);
         line-height: 1.7;
         margin-bottom: 32px;
     }
@@ -392,8 +440,8 @@ const contacts = [
         align-items: center;
         gap: 16px;
         padding: 20px;
-        background: rgba(26, 26, 37, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.06);
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
         border-radius: 16px;
         transition: all 0.3s ease;
     }
@@ -404,29 +452,29 @@ const contacts = [
     }
 
     .contact-icon {
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
-    border-radius: 50%;
+        border-radius: 50%;
 
-    background: radial-gradient(
-        circle at 30% 30%,
-        rgba(99, 102, 241, 0.15),
-        rgba(15, 15, 25, 0.9)
-    );
+        background: radial-gradient(
+            circle at 30% 30%,
+            rgba(99, 102, 241, 0.15),
+            rgba(15, 15, 25, 0.9)
+        );
 
-    border: 1px solid rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.08);
 
-    color: #cbd5ff;
+        color: #cbd5ff;
 
-    box-shadow:
-        0 0 30px rgba(99, 102, 241, 0.15),
-        inset 0 0 20px rgba(99, 102, 241, 0.05);
+        box-shadow:
+            0 0 30px rgba(99, 102, 241, 0.15),
+            inset 0 0 20px rgba(99, 102, 241, 0.05);
 
-    transition: all 0.3s ease;
+        transition: all 0.3s ease;
     }
 
     .contact-icon svg {
@@ -435,13 +483,11 @@ const contacts = [
     }
 
     .contact-card:hover .contact-icon {
-    transform: scale(1.1);
-    box-shadow:
-        0 0 40px rgba(99, 102, 241, 0.4),
-        inset 0 0 25px rgba(99, 102, 241, 0.1);
-}
-
-
+        transform: scale(1.1);
+        box-shadow:
+            0 0 40px rgba(99, 102, 241, 0.4),
+            inset 0 0 25px rgba(99, 102, 241, 0.1);
+    }
 
     .contact-details {
         display: flex;
@@ -451,12 +497,12 @@ const contacts = [
 
     .contact-label {
         font-size: 0.85rem;
-        color: #71717a;
+        color: var(--text-muted);
     }
 
     .contact-value {
         font-size: 1rem;
-        color: #ffffff;
+        color: var(--text-primary);
         text-decoration: none;
         font-weight: 500;
     }
@@ -471,7 +517,7 @@ const contacts = [
 
     .social-label {
         font-size: 0.9rem;
-        color: #71717a;
+        color: var(--text-muted);
         margin-bottom: 16px;
     }
 
@@ -486,10 +532,10 @@ const contacts = [
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(26, 26, 37, 0.8);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
         border-radius: 14px;
-        color: #a1a1aa;
+        color: var(--text-secondary);
         transition: all 0.3s ease;
     }
 
@@ -501,8 +547,8 @@ const contacts = [
     }
 
     .contact-form-wrapper {
-        background: rgba(26, 26, 37, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.06);
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
         border-radius: 24px;
         padding: 40px;
         backdrop-filter: blur(20px);
@@ -522,7 +568,7 @@ const contacts = [
 
     .form-group label {
         font-size: 0.9rem;
-        color: #a1a1aa;
+        color: var(--text-secondary);
         font-weight: 500;
     }
 
@@ -530,10 +576,10 @@ const contacts = [
     .form-group textarea {
         width: 100%;
         padding: 16px 20px;
-        background: rgba(10, 10, 15, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
         border-radius: 14px;
-        color: #ffffff;
+        color: var(--text-primary);
         font-size: 1rem;
         font-family: inherit;
         transition: all 0.3s ease;
@@ -542,7 +588,7 @@ const contacts = [
 
     .form-group input::placeholder,
     .form-group textarea::placeholder {
-        color: #52525b;
+        color: var(--text-muted);
     }
 
     .form-group input:focus,
@@ -591,7 +637,7 @@ const contacts = [
     .copyright {
         text-align: center;
         font-size: 0.9rem;
-        color: #71717a;
+        color: var(--text-muted);
     }
 
     @media (max-width: 968px) {

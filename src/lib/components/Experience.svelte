@@ -2,18 +2,26 @@
     import { onMount, onDestroy } from "svelte";
     import gsap from "gsap";
     import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+    import { language, translations } from "$lib/stores.js";
+
+    // ─── Reactive Language ────────────────────────────────────────────────────
+    $: currentLang = $language;
+    $: t = translations[currentLang];
 
     // ─── Refs ────────────────────────────────────────────────────────────────
     let section;
     let header;
     let svgPath;
     let svgGlowPath;
+    let mobileSvgPath;
+    let mobileSvgGlowPath;
     let progressBar;
     let progressLabel;
     let cardEls = [];
     let nodeEls = [];
     let connectorEls = [];
     let badgeEls = [];
+    let mobileNodeEls = [];
 
     // ─── Data ────────────────────────────────────────────────────────────────
     const experiences = [
@@ -21,16 +29,26 @@
             id: 1,
             step: "01",
             level: "Intern",
+            levelID: "Magang",
             role: "Web Development Intern",
+            roleID: "Magang Pengembangan Web",
             company: "Software House DEF",
             period: "2019 – 2020",
             type: "Internship",
+            typeID: "Magang",
             description:
                 "Started my professional journey learning web development fundamentals and contributing to real-world client projects under senior developer guidance.",
+            descriptionID:
+                "Memulai perjalanan profesional mempelajari dasar-dasar pengembangan web dan berkontribusi pada proyek klien nyata di bawah bimbingan senior developer.",
             highlights: [
                 "Built 3 internal tools",
                 "Team collaboration & code reviews",
                 "Agile sprint participation",
+            ],
+            highlightsID: [
+                "Membangun 3 tools internal",
+                "Kolaborasi tim & code review",
+                "Partisipasi sprint Agile",
             ],
             technologies: ["HTML", "CSS", "JavaScript", "PHP"],
             effect: null,
@@ -40,65 +58,98 @@
             id: 2,
             step: "02",
             level: "Mid-Level",
+            levelID: "Menengah",
             role: "Frontend Developer",
+            roleID: "Developer Frontend",
             company: "Freelance",
             period: "2020 – 2021",
             type: "Contract",
+            typeID: "Kontrak",
             description:
                 "Worked with multiple startups and businesses to design and build modern, responsive web applications and landing pages that convert.",
+            descriptionID:
+                "Bekerja dengan berbagai startup dan bisnis untuk merancang dan membangun aplikasi web modern, responsif, dan halaman arahan yang mengkonversi.",
             highlights: [
                 "15+ clients served",
                 "Portfolio & e-commerce builds",
                 "Avg. 4.9★ client rating",
             ],
+            highlightsID: [
+                "15+ klien dilayani",
+                "Membangun portofolio & e-commerce",
+                "Rata-rata penilaian klien 4.9★",
+            ],
             technologies: ["JavaScript", "React", "SCSS", "Firebase"],
             effect: "ladder",
             effectLabel: "Career Jump — Intern → Frontend",
+            effectLabelID: "Lompatan Karir — Magang → Frontend",
             side: "right",
         },
         {
             id: 3,
             step: "03",
             level: "Full Stack",
+            levelID: "Full Stack",
             role: "Full Stack Developer",
+            roleID: "Developer Full Stack",
             company: "Digital Agency ABC",
             period: "2021 – 2023",
             type: "Full-time",
+            typeID: "Penuh Waktu",
             description:
                 "Built and maintained scalable web applications for clients across e-commerce, healthcare, and fintech — owning the full product lifecycle.",
+            descriptionID:
+                "Membangun dan memelihara aplikasi web yang skalabel untuk klien di bidang e-commerce, kesehatan, dan fintech — mengelola siklus hidup produk secara penuh.",
             highlights: [
                 "20+ projects delivered",
                 "98% client satisfaction",
                 "Reduced load times by 40%",
             ],
+            highlightsID: [
+                "20+ proyek terselesaikan",
+                "98% kepuasan klien",
+                "Mengurangi waktu muat sebesar 40%",
+            ],
             technologies: ["Vue.js", "Node.js", "PostgreSQL", "AWS"],
             effect: "pivot",
             effectLabel: "Tech Pivot — React → Vue + Node.js",
+            effectLabelID: "Pivot Teknologi — React → Vue + Node.js",
             side: "left",
         },
         {
             id: 4,
             step: "04",
             level: "Senior",
+            levelID: "Senior",
             role: "Senior Frontend Developer",
+            roleID: "Developer Frontend Senior",
             company: "Tech Startup XYZ",
             period: "2023 – Present",
             type: "Full-time",
+            typeID: "Penuh Waktu",
             description:
                 "Leading frontend architecture for a SaaS platform with 10K+ active users. Building design systems, optimizing performance, and mentoring junior engineers.",
+            descriptionID:
+                "Memimpin arsitektur frontend untuk platform SaaS dengan 10K+ pengguna aktif. Membangun sistem desain, mengoptimalkan performa, dan membimbing engineer junior.",
             highlights: [
                 "Led React → Next.js migration",
                 "50% performance improvement",
                 "Mentored 3 junior devs",
             ],
+            highlightsID: [
+                "Memimpin migrasi React → Next.js",
+                "50% peningkatan performa",
+                "Membimbing 3 developer junior",
+            ],
             technologies: ["React", "TypeScript", "GraphQL", "Tailwind"],
             effect: "ladder",
             effectLabel: "Career Jump — Full Stack → Senior Lead",
+            effectLabelID: "Lompatan Karir — Full Stack → Senior Lead",
             side: "right",
         },
     ];
 
-    // The SVG snake path definition — shared by main path and glow copy
+    // Desktop S-curve SVG path — wide zig-zag
     const snakePath = `
         M 100 30
         C 25 30, 25 200, 100 300
@@ -107,9 +158,26 @@
         C 175 1120, 175 1250, 100 1320
     `.trim();
 
+    // Mobile S-curve SVG path — narrow centered
+    const mobileSnakePath = `
+        M 30 20
+        C 5 20, 5 130, 30 200
+        C 55 270, 55 380, 30 450
+        C 5 520, 5 630, 30 700
+        C 55 770, 55 860, 30 920
+    `.trim();
+
+    // Node positions along mobile path (evenly spaced)
+    const mobileNodePositions = [0.06, 0.32, 0.57, 0.82];
+
     // ─── onMount ─────────────────────────────────────────────────────────────
     onMount(() => {
         gsap.registerPlugin(ScrollTrigger);
+
+        const isMobile = window.matchMedia("(max-width: 768px)").matches;
+        const isTablet = window.matchMedia(
+            "(max-width: 900px) and (min-width: 769px)",
+        ).matches;
 
         // ── 1. Header reveal ────────────────────────────────────────────────
         gsap.fromTo(
@@ -128,146 +196,210 @@
             },
         );
 
-        // ── 2. SVG path draw ─────────────────────────────────────────────────
-        if (svgPath) {
-            const len = svgPath.getTotalLength();
-            gsap.set([svgPath, svgGlowPath], {
-                strokeDasharray: len,
-                strokeDashoffset: len,
-            });
-            gsap.to([svgPath, svgGlowPath], {
-                strokeDashoffset: 0,
-                ease: "none",
-                scrollTrigger: {
-                    trigger: section,
-                    start: "top 65%",
-                    end: "bottom 15%",
-                    scrub: 1.2,
-                },
-            });
-        }
+        if (isMobile) {
+            // ── MOBILE: Simple animations ────────────────────────────────────
 
-        // ── 3. Progress sidebar ──────────────────────────────────────────────
-        ScrollTrigger.create({
-            trigger: section,
-            start: "top 65%",
-            end: "bottom 15%",
-            scrub: true,
-            onUpdate: (self) => {
-                const pct = Math.round(self.progress * 100);
-                if (progressBar) progressBar.style.height = pct + "%";
-                if (progressLabel) progressLabel.textContent = pct + "%";
-            },
-        });
-
-        // ── 4. Cards, nodes & connectors ─────────────────────────────────────
-        experiences.forEach((exp, i) => {
-            const card = cardEls[i];
-            const node = nodeEls[i];
-            const connector = connectorEls[i];
-            if (!card || !node) return;
-
-            const isLeft = exp.side === "left";
-
-            // Set initial states
-            gsap.set(card, {
-                x: isLeft ? -100 : 100,
-                opacity: 0,
-                rotateY: isLeft ? -10 : 10,
-            });
-            gsap.set(node, { scale: 0, opacity: 0 });
-            if (connector) {
-                gsap.set(connector, {
-                    scaleX: 0,
-                    opacity: 0,
-                    transformOrigin: isLeft ? "right center" : "left center",
+            // Mobile SVG path draw
+            if (mobileSvgPath) {
+                const len = mobileSvgPath.getTotalLength();
+                gsap.set([mobileSvgPath, mobileSvgGlowPath], {
+                    strokeDasharray: len,
+                    strokeDashoffset: len,
+                });
+                gsap.to([mobileSvgPath, mobileSvgGlowPath], {
+                    strokeDashoffset: 0,
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: section,
+                        start: "top 70%",
+                        end: "bottom 20%",
+                        scrub: 1.2,
+                    },
                 });
             }
 
-            const tl = gsap.timeline({
-                scrollTrigger: {
-                    trigger: card,
-                    start: "top 85%",
-                    end: "top 50%",
-                    scrub: 0.9,
-                    toggleActions: "play reverse play reverse",
-                },
+            // Mobile node animations
+            mobileNodeEls.forEach((node) => {
+                if (!node) return;
+                gsap.fromTo(
+                    node,
+                    { scale: 0, opacity: 0 },
+                    {
+                        scale: 1,
+                        opacity: 1,
+                        ease: "back.out(2)",
+                        scrollTrigger: {
+                            trigger: node,
+                            start: "top 90%",
+                            end: "top 70%",
+                            scrub: 0.8,
+                        },
+                    },
+                );
             });
 
-            // Node pops in first
-            tl.to(
-                node,
-                {
-                    scale: 1.15,
-                    opacity: 1,
-                    ease: "back.out(2.5)",
-                    duration: 0.3,
-                },
-                0,
-            ).to(node, { scale: 1, duration: 0.15 }, 0.3);
-
-            // Connector draws toward card
-            if (connector) {
-                tl.to(
-                    connector,
+            // Mobile card reveal: y 40 → 0, opacity 0 → 1
+            cardEls.forEach((card) => {
+                if (!card) return;
+                gsap.fromTo(
+                    card,
+                    { y: 40, opacity: 0 },
                     {
-                        scaleX: 1,
+                        y: 0,
                         opacity: 1,
                         ease: "power2.out",
-                        duration: 0.25,
+                        scrollTrigger: {
+                            trigger: card,
+                            start: "top 88%",
+                            end: "top 55%",
+                            scrub: 0.8,
+                            toggleActions: "play reverse play reverse",
+                        },
                     },
-                    0.1,
                 );
+            });
+        } else {
+            // ── DESKTOP / TABLET: Full animations ────────────────────────────
+
+            // SVG path draw
+            if (svgPath) {
+                const len = svgPath.getTotalLength();
+                gsap.set([svgPath, svgGlowPath], {
+                    strokeDasharray: len,
+                    strokeDashoffset: len,
+                });
+                gsap.to([svgPath, svgGlowPath], {
+                    strokeDashoffset: 0,
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: section,
+                        start: "top 65%",
+                        end: "bottom 15%",
+                        scrub: 1.2,
+                    },
+                });
             }
 
-            // Card slides in with subtle 3D tilt
-            tl.to(
-                card,
-                {
-                    x: 0,
-                    opacity: 1,
-                    rotateY: 0,
-                    ease: "power3.out",
-                    duration: 0.55,
-                },
-                0.15,
-            );
-        });
-
-        // ── 5. Effect badges animate in ──────────────────────────────────────
-        badgeEls.forEach((badge) => {
-            if (!badge) return;
-            gsap.fromTo(
-                badge,
-                { scaleY: 0, opacity: 0, transformOrigin: "top center" },
-                {
-                    scaleY: 1,
-                    opacity: 1,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: badge,
-                        start: "top 85%",
-                        end: "top 60%",
-                        scrub: 1,
-                        toggleActions: "play reverse play reverse",
-                    },
-                },
-            );
-        });
-
-        // ── 6. Parallax grid ─────────────────────────────────────────────────
-        const grid = section?.querySelector(".bg-grid");
-        if (grid) {
-            gsap.to(grid, {
-                y: -90,
-                ease: "none",
-                scrollTrigger: {
-                    trigger: section,
-                    start: "top bottom",
-                    end: "bottom top",
-                    scrub: true,
+            // Progress sidebar
+            ScrollTrigger.create({
+                trigger: section,
+                start: "top 65%",
+                end: "bottom 15%",
+                scrub: true,
+                onUpdate: (self) => {
+                    const pct = Math.round(self.progress * 100);
+                    if (progressBar) progressBar.style.height = pct + "%";
+                    if (progressLabel) progressLabel.textContent = pct + "%";
                 },
             });
+
+            // Cards, nodes & connectors
+            experiences.forEach((exp, i) => {
+                const card = cardEls[i];
+                const node = nodeEls[i];
+                const connector = connectorEls[i];
+                if (!card || !node) return;
+
+                const isLeft = exp.side === "left";
+
+                gsap.set(card, {
+                    x: isLeft ? -100 : 100,
+                    opacity: 0,
+                    rotateY: isLeft ? -10 : 10,
+                });
+                gsap.set(node, { scale: 0, opacity: 0 });
+                if (connector) {
+                    gsap.set(connector, {
+                        scaleX: 0,
+                        opacity: 0,
+                        transformOrigin: isLeft
+                            ? "right center"
+                            : "left center",
+                    });
+                }
+
+                const tl = gsap.timeline({
+                    scrollTrigger: {
+                        trigger: card,
+                        start: "top 85%",
+                        end: "top 50%",
+                        scrub: 0.9,
+                        toggleActions: "play reverse play reverse",
+                    },
+                });
+
+                tl.to(
+                    node,
+                    {
+                        scale: 1.15,
+                        opacity: 1,
+                        ease: "back.out(2.5)",
+                        duration: 0.3,
+                    },
+                    0,
+                ).to(node, { scale: 1, duration: 0.15 }, 0.3);
+
+                if (connector) {
+                    tl.to(
+                        connector,
+                        {
+                            scaleX: 1,
+                            opacity: 1,
+                            ease: "power2.out",
+                            duration: 0.25,
+                        },
+                        0.1,
+                    );
+                }
+
+                tl.to(
+                    card,
+                    {
+                        x: 0,
+                        opacity: 1,
+                        rotateY: 0,
+                        ease: "power3.out",
+                        duration: 0.55,
+                    },
+                    0.15,
+                );
+            });
+
+            // Effect badges
+            badgeEls.forEach((badge) => {
+                if (!badge) return;
+                gsap.fromTo(
+                    badge,
+                    { scaleY: 0, opacity: 0, transformOrigin: "top center" },
+                    {
+                        scaleY: 1,
+                        opacity: 1,
+                        ease: "power2.out",
+                        scrollTrigger: {
+                            trigger: badge,
+                            start: "top 85%",
+                            end: "top 60%",
+                            scrub: 1,
+                            toggleActions: "play reverse play reverse",
+                        },
+                    },
+                );
+            });
+
+            // Parallax grid (desktop only — perf sensitive on mobile)
+            const grid = section?.querySelector(".bg-grid");
+            if (grid) {
+                gsap.to(grid, {
+                    y: -90,
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: section,
+                        start: "top bottom",
+                        end: "bottom top",
+                        scrub: true,
+                    },
+                });
+            }
         }
     });
 
@@ -333,19 +465,20 @@
                 >
                     <path d="M3 12h18M3 6l9-3 9 3M3 18l9 3 9-3" />
                 </svg>
-                Career Path
+                {t.experience.label}
             </div>
             <h2 class="section-title">
-                Work <span class="gradient-text">Experience</span>
+                {t.experience.title}
+                <span class="gradient-text">{t.experience.titleHighlight}</span>
             </h2>
             <p class="section-subtitle">
-                A winding journey through the world of web development
+                {t.experience.subtitle}
             </p>
         </div>
 
-        <!-- Snake Layout -->
-        <div class="snake-layout">
-            <!-- ─── SVG Snake Path ─────────────────────────────────────── -->
+        <!-- Snake Layout — Desktop -->
+        <div class="snake-layout desktop-snake">
+            <!-- ─── Desktop SVG Snake Path ──────────────────────────────── -->
             <svg
                 class="snake-svg"
                 viewBox="0 0 200 1350"
@@ -380,8 +513,6 @@
                         </feMerge>
                     </filter>
                 </defs>
-
-                <!-- Glow layer -->
                 <path
                     bind:this={svgGlowPath}
                     d={snakePath}
@@ -392,7 +523,6 @@
                     opacity="0.25"
                     filter="url(#glowFilter)"
                 />
-                <!-- Main path -->
                 <path
                     bind:this={svgPath}
                     d={snakePath}
@@ -403,16 +533,16 @@
                 />
             </svg>
 
-            <!-- ─── Experience Items ────────────────────────────────────── -->
+            <!-- ─── Desktop Experience Items ───────────────────────────── -->
             {#each experiences as exp, i}
-                <!-- ── Row ────────────────────────────────────────────────── -->
                 <div class="exp-row {exp.side}">
-                    <!-- ── Effect badge (sits at top of row = between rows) ── -->
                     {#if exp.effect === "ladder"}
                         <div
                             class="effect-badge ladder"
                             bind:this={badgeEls[i]}
-                            title={exp.effectLabel}
+                            title={currentLang === "EN"
+                                ? exp.effectLabel
+                                : exp.effectLabelID}
                         >
                             <div class="effect-line"></div>
                             <div class="effect-icon">
@@ -427,13 +557,19 @@
                                     <path d="M12 19V5M5 12l7-7 7 7" />
                                 </svg>
                             </div>
-                            <div class="effect-tooltip">{exp.effectLabel}</div>
+                            <div class="effect-tooltip">
+                                {currentLang === "EN"
+                                    ? exp.effectLabel
+                                    : exp.effectLabelID}
+                            </div>
                         </div>
                     {:else if exp.effect === "pivot"}
                         <div
                             class="effect-badge pivot"
                             bind:this={badgeEls[i]}
-                            title={exp.effectLabel}
+                            title={currentLang === "EN"
+                                ? exp.effectLabel
+                                : exp.effectLabelID}
                         >
                             <div class="effect-curve">
                                 <svg
@@ -483,7 +619,11 @@
                                     <path d="M21 13v2a4 4 0 01-4 4H3" />
                                 </svg>
                             </div>
-                            <div class="effect-tooltip">{exp.effectLabel}</div>
+                            <div class="effect-tooltip">
+                                {currentLang === "EN"
+                                    ? exp.effectLabel
+                                    : exp.effectLabelID}
+                            </div>
                         </div>
                     {:else}
                         <div
@@ -491,7 +631,6 @@
                             class="effect-spacer"
                         ></div>
                     {/if}
-                    <!-- Node -->
                     <div class="node-area">
                         <div class="node-wrap" bind:this={nodeEls[i]}>
                             <div class="node-glow"></div>
@@ -500,46 +639,49 @@
                                     <span class="step-num">{exp.step}</span>
                                 </div>
                             </div>
-                            <div class="level-badge">{exp.level}</div>
+                            <div class="level-badge">
+                                {currentLang === "EN" ? exp.level : exp.levelID}
+                            </div>
                         </div>
                     </div>
-
-                    <!-- Connector line -->
                     <div
                         class="connector {exp.side}"
                         bind:this={connectorEls[i]}
                     ></div>
-
-                    <!-- Experience Card -->
                     <article
                         class="exp-card"
                         bind:this={cardEls[i]}
                         on:mouseenter={() => onCardEnter(i)}
                         on:mouseleave={() => onCardLeave(i)}
                     >
-                        <!-- Faded step number in background -->
                         <div class="bg-step-num" aria-hidden="true">
                             {exp.step}
                         </div>
-
-                        <!-- Card header -->
                         <div class="card-top">
                             <div class="card-meta">
-                                <h3 class="role">{exp.role}</h3>
+                                <h3 class="role">
+                                    {currentLang === "EN"
+                                        ? exp.role
+                                        : exp.roleID}
+                                </h3>
                                 <p class="company">@ {exp.company}</p>
                             </div>
                             <div class="card-side">
                                 <span class="period">{exp.period}</span>
-                                <span class="type-badge">{exp.type}</span>
+                                <span class="type-badge"
+                                    >{currentLang === "EN"
+                                        ? exp.type
+                                        : exp.typeID}</span
+                                >
                             </div>
                         </div>
-
-                        <!-- Description -->
-                        <p class="description">{exp.description}</p>
-
-                        <!-- Highlights -->
+                        <p class="description">
+                            {currentLang === "EN"
+                                ? exp.description
+                                : exp.descriptionID}
+                        </p>
                         <ul class="highlights">
-                            {#each exp.highlights as hl}
+                            {#each currentLang === "EN" ? exp.highlights : exp.highlightsID as hl}
                                 <li class="highlight">
                                     <svg
                                         width="13"
@@ -556,15 +698,146 @@
                                 </li>
                             {/each}
                         </ul>
-
-                        <!-- Tech stack -->
                         <div class="tech-tags">
                             {#each exp.technologies as tech}
                                 <span class="tech-tag">{tech}</span>
                             {/each}
                         </div>
+                        <div class="card-border-glow" aria-hidden="true"></div>
+                    </article>
+                </div>
+            {/each}
+        </div>
 
-                        <!-- Hover border gradient overlay -->
+        <!-- Mobile Snake Layout — centered narrow S-curve -->
+        <div class="mobile-snake">
+            <!-- Mobile SVG centered S-curve -->
+            <svg
+                class="mobile-snake-svg"
+                viewBox="0 0 60 940"
+                preserveAspectRatio="xMidYMid meet"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+            >
+                <defs>
+                    <linearGradient
+                        id="mobilePathGrad"
+                        x1="0%"
+                        y1="0%"
+                        x2="0%"
+                        y2="100%"
+                    >
+                        <stop offset="0%" stop-color="#6366f1" />
+                        <stop offset="40%" stop-color="#a855f7" />
+                        <stop offset="75%" stop-color="#ec4899" />
+                        <stop offset="100%" stop-color="#f43f5e" />
+                    </linearGradient>
+                    <filter
+                        id="mobileGlowFilter"
+                        x="-100%"
+                        y="-10%"
+                        width="300%"
+                        height="120%"
+                    >
+                        <feGaussianBlur stdDeviation="3" result="blur" />
+                        <feMerge>
+                            <feMergeNode in="blur" />
+                            <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                    </filter>
+                </defs>
+                <!-- Glow layer -->
+                <path
+                    bind:this={mobileSvgGlowPath}
+                    d={mobileSnakePath}
+                    fill="none"
+                    stroke="url(#mobilePathGrad)"
+                    stroke-width="4"
+                    stroke-linecap="round"
+                    opacity="0.2"
+                    filter="url(#mobileGlowFilter)"
+                />
+                <!-- Main path -->
+                <path
+                    bind:this={mobileSvgPath}
+                    d={mobileSnakePath}
+                    fill="none"
+                    stroke="url(#mobilePathGrad)"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                />
+            </svg>
+
+            <!-- Mobile experience items — stacked vertically -->
+            {#each experiences as exp, i}
+                <div class="mobile-exp-item">
+                    <!-- Node along the curve -->
+                    <div class="mobile-node" bind:this={mobileNodeEls[i]}>
+                        <div class="mobile-node-glow"></div>
+                        <div class="mobile-node-ring">
+                            <div class="mobile-node-inner">
+                                <span class="step-num">{exp.step}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card -->
+                    <article
+                        class="exp-card mobile-card"
+                        bind:this={cardEls[i]}
+                    >
+                        <div class="bg-step-num" aria-hidden="true">
+                            {exp.step}
+                        </div>
+                        <div class="mobile-card-header">
+                            <span class="mobile-level-badge">
+                                {currentLang === "EN" ? exp.level : exp.levelID}
+                            </span>
+                            <span class="period">{exp.period}</span>
+                        </div>
+                        <div class="card-top">
+                            <div class="card-meta">
+                                <h3 class="role">
+                                    {currentLang === "EN"
+                                        ? exp.role
+                                        : exp.roleID}
+                                </h3>
+                                <p class="company">@ {exp.company}</p>
+                            </div>
+                            <span class="type-badge"
+                                >{currentLang === "EN"
+                                    ? exp.type
+                                    : exp.typeID}</span
+                            >
+                        </div>
+                        <p class="description">
+                            {currentLang === "EN"
+                                ? exp.description
+                                : exp.descriptionID}
+                        </p>
+                        <ul class="highlights">
+                            {#each currentLang === "EN" ? exp.highlights : exp.highlightsID as hl}
+                                <li class="highlight">
+                                    <svg
+                                        width="13"
+                                        height="13"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        aria-hidden="true"
+                                    >
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg>
+                                    {hl}
+                                </li>
+                            {/each}
+                        </ul>
+                        <div class="tech-tags">
+                            {#each exp.technologies as tech}
+                                <span class="tech-tag">{tech}</span>
+                            {/each}
+                        </div>
                         <div class="card-border-glow" aria-hidden="true"></div>
                     </article>
                 </div>
@@ -732,7 +1005,7 @@
         font-family: "Space Grotesk", sans-serif;
         font-size: clamp(2.2rem, 5.5vw, 3.4rem);
         font-weight: 800;
-        color: #ffffff;
+        color: var(--text-primary);
         margin-bottom: 16px;
         line-height: 1.1;
     }
@@ -751,7 +1024,7 @@
 
     .section-subtitle {
         font-size: 1.05rem;
-        color: #a1a1aa;
+        color: var(--text-secondary);
         max-width: 460px;
         margin: 0 auto;
         line-height: 1.6;
@@ -1036,8 +1309,8 @@
     .exp-card {
         position: relative;
         width: calc(50% - 118px);
-        background: rgba(15, 15, 28, 0.72);
-        border: 1px solid rgba(255, 255, 255, 0.065);
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
         border-radius: 22px;
         padding: 26px 28px 24px;
         backdrop-filter: blur(28px);
@@ -1121,7 +1394,7 @@
         font-family: "Space Grotesk", sans-serif;
         font-size: 1.12rem;
         font-weight: 700;
-        color: #ffffff;
+        color: var(--text-primary);
         margin-bottom: 4px;
         line-height: 1.25;
     }
@@ -1142,7 +1415,7 @@
 
     .period {
         font-size: 0.78rem;
-        color: #71717a;
+        color: var(--text-muted);
         font-weight: 400;
     }
 
@@ -1160,7 +1433,7 @@
     /* ── Description ── */
     .description {
         font-size: 0.875rem;
-        color: #a1a1aa;
+        color: var(--text-secondary);
         line-height: 1.7;
         margin-bottom: 16px;
     }
@@ -1198,12 +1471,12 @@
 
     .tech-tag {
         padding: 4px 12px;
-        background: rgba(255, 255, 255, 0.045);
-        border: 1px solid rgba(255, 255, 255, 0.07);
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
         border-radius: 100px;
         font-size: 0.72rem;
         font-weight: 500;
-        color: #71717a;
+        color: var(--text-muted);
         transition:
             color 0.2s ease,
             border-color 0.2s ease,
@@ -1211,13 +1484,13 @@
     }
 
     .exp-card:hover .tech-tag {
-        color: #a1a1aa;
+        color: var(--text-secondary);
         border-color: rgba(168, 85, 247, 0.2);
         background: rgba(168, 85, 247, 0.06);
     }
 
     /* ─────────────────────────────────────────────────────────────────────────
-       RESPONSIVE — TABLET (max-width: 900px)
+       TABLET (max-width: 900px)
     ───────────────────────────────────────────────────────────────────────── */
     @media (max-width: 900px) {
         .exp-card {
@@ -1235,8 +1508,19 @@
     }
 
     /* ─────────────────────────────────────────────────────────────────────────
-       RESPONSIVE — MOBILE (max-width: 768px)
+       MOBILE — Show/hide correct layout
     ───────────────────────────────────────────────────────────────────────── */
+
+    /* Desktop snake: visible by default, hidden on mobile */
+    .desktop-snake {
+        display: block;
+    }
+
+    /* Mobile snake: hidden by default, visible only on mobile */
+    .mobile-snake {
+        display: none;
+    }
+
     @media (max-width: 768px) {
         section {
             padding: 80px 0 120px;
@@ -1251,105 +1535,152 @@
             display: none;
         }
 
-        /* Simplified left-side vertical line */
-        .snake-layout {
-            min-height: auto;
-            padding-left: 60px;
+        /* Switch layouts */
+        .desktop-snake {
+            display: none;
         }
 
-        .snake-svg {
-            left: 28px;
-            transform: none;
-            width: 56px;
+        .mobile-snake {
+            display: block;
+            position: relative;
+            padding: 0 16px 40px;
         }
 
-        /* All rows stack vertically, full-width */
-        .exp-row,
-        .exp-row.left,
-        .exp-row.right {
-            flex-direction: column;
-            align-items: flex-start;
-            justify-content: flex-start;
-            height: auto;
-            margin-bottom: 52px;
-        }
-
-        /* Node sits above the card on the left rail */
-        .node-area {
+        /* Mobile SVG: centered, narrow, spans full height */
+        .mobile-snake-svg {
             position: absolute;
-            left: -28px; /* align to the line center */
+            left: 50%;
+            transform: translateX(
+                -48px
+            ); /* half of 60px viewBox width + some offset */
             top: 0;
-            transform: translateX(-50%);
+            width: 60px;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
         }
 
-        /* Hide horizontal connector on mobile */
-        .connector {
-            display: none;
+        /* Mobile exp items — vertical stack */
+        .mobile-exp-item {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 48px;
+            z-index: 1;
         }
 
-        /* Cards take full remaining width */
-        .exp-card {
+        /* Mobile node */
+        .mobile-node {
+            position: relative;
+            z-index: 2;
+            margin-bottom: 16px;
+            flex-shrink: 0;
+        }
+
+        .mobile-node-glow {
+            position: absolute;
+            inset: -8px;
+            border-radius: 50%;
+            background: radial-gradient(
+                circle,
+                rgba(168, 85, 247, 0.25),
+                transparent 70%
+            );
+            animation: pulseGlow 2.5s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .mobile-node-ring {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            padding: 2px;
+            position: relative;
+        }
+
+        .mobile-node-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: var(--bg-section, #0d0d14);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Mobile card: full-width */
+        .mobile-card {
             width: 100% !important;
-            margin: 54px 0 0 0 !important;
+            margin: 0 !important;
         }
 
-        /* Effect badges center above the node area */
-        .effect-badge {
-            left: -28px;
-            transform: translateX(-50%);
-            top: -48px;
+        /* Mobile card header row */
+        .mobile-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
         }
 
-        .effect-spacer {
-            display: none;
+        .mobile-level-badge {
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            background: linear-gradient(
+                135deg,
+                rgba(99, 102, 241, 0.15),
+                rgba(168, 85, 247, 0.15)
+            );
+            border: 1px solid rgba(168, 85, 247, 0.25);
+            border-radius: 100px;
+            color: #c4b5fd;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
         }
 
         .bg-step-num {
             font-size: 4rem;
         }
+
+        /* Make card-top stack on small screens */
+        .mobile-card .card-top {
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .section-header {
+            margin-bottom: 56px;
+        }
     }
 
     @media (max-width: 480px) {
-        .snake-layout {
-            padding-left: 50px;
+        .mobile-snake {
+            padding: 0 12px 32px;
         }
 
-        .snake-svg {
-            left: 22px;
-            width: 44px;
+        .mobile-card {
+            padding: 20px 16px !important;
+            border-radius: 16px !important;
         }
 
-        .node-area {
-            left: -22px;
-        }
-
-        .node-ring {
-            width: 42px;
-            height: 42px;
-        }
-
-        .exp-card {
-            padding: 20px 18px;
-            border-radius: 16px;
-        }
-
-        .role {
+        .mobile-card .role {
             font-size: 1rem;
         }
 
-        .card-top {
+        .mobile-card .card-top {
             flex-direction: column;
             gap: 8px;
         }
 
-        .card-side {
-            flex-direction: row;
-            align-items: center;
-            gap: 8px;
+        .section-header {
+            margin-bottom: 48px;
         }
 
-        .section-header {
-            margin-bottom: 60px;
+        .section-subtitle {
+            font-size: 0.95rem;
+            padding: 0 8px;
         }
     }
 </style>
