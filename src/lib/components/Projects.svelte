@@ -343,8 +343,14 @@
         left: 0;
         width: 100%;
         height: calc(100% - 32px);
-        object-fit: cover;
-        transition: transform 0.6s ease;
+        object-fit: contain;
+        background: black;
+    }
+
+    video:fullscreen {
+        width: 100vw;
+        height: 100vh;
+        object-fit: contain;
     }
 
     .project-card:hover .project-image,

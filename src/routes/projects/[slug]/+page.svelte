@@ -800,8 +800,15 @@
     .hero-media {
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain;   /* ✅ Tidak akan terpotong */
+    background: #000;
         display: block;
+    }
+    video:fullscreen,
+    video:-webkit-full-screen {
+        width: 100vw;
+        height: 100vh;
+        object-fit: contain;
     }
 
     /* ── Custom Video Player ── */

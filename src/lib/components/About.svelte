@@ -320,7 +320,7 @@
                                 /></svg
                             >
                         </span>
-                        <span>3+ Years Experience</span>
+                        <span>2+ Years Experience</span>
                     </div>
                     <div class="pill-badge">
                         <span class="pill-icon">

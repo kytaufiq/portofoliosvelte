@@ -227,17 +227,17 @@
 
             <div bind:this={stats} class="hero-stats">
                 <div class="stat">
-                    <span class="stat-number">3+</span>
+                    <span class="stat-number">2+</span>
                     <span class="stat-label">{t.home.yearsExp}</span>
                 </div>
                 <div class="stat-divider"></div>
                 <div class="stat">
-                    <span class="stat-number">50+</span>
+                    <span class="stat-number">7+</span>
                     <span class="stat-label">{t.home.projectsCompleted}</span>
                 </div>
                 <div class="stat-divider"></div>
                 <div class="stat">
-                    <span class="stat-number">30+</span>
+                    <span class="stat-number">5+</span>
                     <span class="stat-label">{t.home.happyClients}</span>
                 </div>
             </div>

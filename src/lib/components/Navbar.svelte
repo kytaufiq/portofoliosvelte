@@ -47,14 +47,16 @@
         });
 
         // Stagger animate nav links
-        gsap.from(links, {
-            y: -20,
-            opacity: 0,
-            duration: 0.6,
-            stagger: 0.08,
-            delay: 0.5,
-            ease: "power2.out",
-        });
+        if (window.innerWidth >= 900) {
+            gsap.from(links, {
+                y: -20,
+                opacity: 0,
+                duration: 0.6,
+                stagger: 0.08,
+                delay: 0.5,
+                ease: "power2.out",
+            });
+        }
 
         // Handle scroll for navbar background
         const handleScroll = () => {
@@ -87,6 +89,7 @@
     });
 
     function updateIndicator(index) {
+        if (window.innerWidth < 900) return;
         if (links[index] && activeIndicator) {
             const link = links[index];
             const rect = link.getBoundingClientRect();
@@ -110,7 +113,13 @@
     }
 
     const toggleMobileMenu = () => {
-        isMobileMenuOpen = !isMobileMenuOpen;
+    isMobileMenuOpen = !isMobileMenuOpen;
+
+        if (window.innerWidth < 900) {
+            links.forEach((link) => {
+                gsap.set(link, { clearProps: "all" });
+            });
+        }
     };
 
     const closeMobileMenu = () => {
@@ -155,7 +164,7 @@
 <nav
     bind:this={navbar}
     class:scrolled={isScrolled}
-    class:menu-open={isMobileMenuOpen}
+    class:hidden-nav={isMobileMenuOpen}
     data-theme={currentTheme}
 >
     <div class="nav-container">
@@ -388,6 +397,12 @@
 
 <style>
     /* ── NAVBAR BASE ─────────────────────────────────────────────────────────── */
+    .hidden-nav {
+        transform: translateY(-110%);
+        opacity: 0;
+        pointer-events: none;
+    }
+
     nav {
         position: fixed;
         top: 0;
@@ -395,7 +410,7 @@
         right: 0;
         z-index: 1000;
         padding: 16px 0;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s ease;
     }
 
     nav.scrolled {
@@ -406,9 +421,7 @@
     }
 
     /* Lower z-index when mobile drawer is open to prevent bleed-through */
-    nav.menu-open {
-        z-index: 990;
-    }
+
 
     .nav-border {
         position: absolute;
@@ -435,9 +448,9 @@
         max-width: 1280px;
         margin: 0 auto;
         padding: 0 32px;
-        display: flex;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
         align-items: center;
-        justify-content: space-between;
     }
 
     /* ── LOGO ────────────────────────────────────────────────────────────────── */
@@ -511,10 +524,16 @@
     }
 
     /* ── DESKTOP NAV LINKS ───────────────────────────────────────────────────── */
+    .nav-container {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+    }
+
     .nav-links-wrapper {
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
+        justify-self: center;
+        position: static;
+        transform: none;
     }
 
     .nav-links {
@@ -958,9 +977,7 @@
         }
 
         /* Hide language button on small screens to prevent overflow */
-        .lang-btn {
-            display: none;
-        }
+        
 
         .nav-actions {
             gap: 8px;
